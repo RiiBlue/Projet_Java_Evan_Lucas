@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 import java.io.FileInputStream;
 import java.io.IOException;
+import org.mindrot.jbcrypt.BCrypt;  // Import de BCrypt
 
 public class Inscription {
 
@@ -33,13 +34,13 @@ public class Inscription {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null); // Centrer la fenêtre à l'écran
 
-        //Affichage vertical de tout les panels
+        // Affichage vertical de tout les panels
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(new Color(242, 242, 242));
         panel.setPreferredSize(new Dimension(400, 300)); // Limiter la taille du panel
 
-        //Panel centré
+        // Panel centré
         JPanel containerPanel = new JPanel(new GridBagLayout());
         containerPanel.setBackground(new Color(242, 242, 242));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -56,7 +57,7 @@ public class Inscription {
         JLabel passwordLabel = new JLabel("Mot de passe :");
         JPasswordField passwordField = new JPasswordField(20);
 
-        //tout les trucs du boutons
+        // Tout les trucs du boutons
         JButton submitButton = new JButton("S'inscrire");
         submitButton.setBackground(Color.WHITE); // Fond blanc
         submitButton.setForeground(Color.BLACK); // Texte noir
@@ -66,7 +67,7 @@ public class Inscription {
         submitButton.setOpaque(true); // On s'assure que le fond du bouton est totalement opaque
         submitButton.setContentAreaFilled(true); // On désactive les zones de remplissage transparentes
 
-        //pour espacement et ajustement des bloc
+        // Pour espacement et ajustement des blocs
         panel.add(Box.createVerticalStrut(20)); // Espacement
         panel.add(nameLabel);
         panel.add(nameField);
@@ -118,8 +119,11 @@ public class Inscription {
                 return;
             }
 
-            // Insertion dans la base de données
-            insertUser(connection, name, email, password);
+            // Hashage du mot de passe avec BCrypt
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+            // Insertion dans la base de données avec le mot de passe hashé
+            insertUser(connection, name, email, hashedPassword);
             JOptionPane.showMessageDialog(null, "Inscription réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (SQLException ex) {
@@ -127,11 +131,13 @@ public class Inscription {
             JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
-    //tout est dans le titre
+
+    // Vérifie si l'email est valide
     private boolean isValidEmail(String email) {
         return Pattern.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email);
     }
-    //tout est dans le titre
+
+    // Vérifie si le mot de passe est valide
     private boolean isValidPassword(String password) {
         return password.length() >= 8 &&
                 Pattern.compile(".*[A-Z].*").matcher(password).find() &&
@@ -139,7 +145,8 @@ public class Inscription {
                 Pattern.compile(".*\\d.*").matcher(password).find() &&
                 Pattern.compile(".*[!@#$%^&*(),.?\\\":{}|<>].*").matcher(password).find();
     }
-    //tout est dans le titre
+
+    // Vérifie si l'email est dans la liste blanche
     private boolean isEmailInWhitelist(Connection connection, String email) throws SQLException {
         String query = "SELECT COUNT(*) FROM white_list WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -148,7 +155,8 @@ public class Inscription {
             return rs.next() && rs.getInt(1) > 0;
         }
     }
-    //tout est dans le titre
+
+    // Vérifie si l'email est déjà utilisé
     private boolean isEmailAlreadyUsed(Connection connection, String email) throws SQLException {
         String query = "SELECT COUNT(*) FROM users WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -157,7 +165,8 @@ public class Inscription {
             return rs.next() && rs.getInt(1) > 0;
         }
     }
-    //tout est dans le titre
+
+    // Insère l'utilisateur dans la base de données
     private void insertUser(Connection connection, String name, String email, String password) throws SQLException {
         String query = "INSERT INTO users (name_compagny, email, password) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -167,7 +176,8 @@ public class Inscription {
             stmt.executeUpdate();
         }
     }
-    //lancement du main bg
+
+    // Lancement du main
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Inscription().afficherInscription());
     }
