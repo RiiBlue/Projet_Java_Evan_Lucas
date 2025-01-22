@@ -2,10 +2,12 @@ package Projet_Java;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class Connexion {
@@ -29,60 +31,110 @@ public class Connexion {
         }
 
         JFrame frame = new JFrame("Connexion");
-        frame.setSize(600, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(242, 242, 242));
-        panel.setPreferredSize(new Dimension(400, 300));
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
-        JPanel containerPanel = new JPanel(new GridBagLayout());
-        containerPanel.setBackground(new Color(242, 242, 242));
+        JPanel navBar = new JPanel();
+        navBar.setBackground(new Color(33, 37, 41)); // Couleur sombre pour la navbar
+        navBar.setLayout(new FlowLayout(FlowLayout.LEFT)); // Aligner à droite
+        JButton homeButton = new JButton("Accueil");
+        homeButton.setBackground(new Color(0, 123, 255)); // Bleu
+        homeButton.setForeground(Color.WHITE);
+        homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // Action du bouton Accueil
+        homeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Fermer la fenêtre actuelle
+                frame.dispose();
+                // Ouvrir la fenêtre principale
+                new Main().createMainFrame();
+            }
+        });
+        navBar.add(homeButton);
+        mainPanel.add(navBar, BorderLayout.NORTH);
+
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setBackground(new Color(242, 242, 242));
         GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 50, 5, 50);
+        gbc.weightx = 1;
+
+        JLabel title = new JLabel("Connexion", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        containerPanel.add(panel, gbc);
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(30, 50, 30, 50);
+        contentPanel.add(title, gbc);
 
-        JLabel emailLabel = new JLabel("Email :");
-        JTextField emailField = new JTextField(20);
+        JLabel emailLabel = new JLabel("Email :", SwingConstants.LEFT);
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(10, 150, 5, 150);
+        contentPanel.add(emailLabel, gbc);
 
-        JLabel passwordLabel = new JLabel("Mot de passe :");
-        JPasswordField passwordField = new JPasswordField(20);
+        JTextField emailField = new JTextField(20); // Pas besoin de dimension spécifique
+        gbc.gridy = 2;
+        emailField.setPreferredSize(new Dimension(400, 100)); // Ajuste la taille
+        contentPanel.add(emailField, gbc);
 
-        JButton submitButton = new JButton("Connexion");
-        submitButton.setBackground(Color.WHITE);
-        submitButton.setForeground(Color.BLACK);
-        submitButton.setFont(new Font("Arial", Font.BOLD, 16));
-        submitButton.setPreferredSize(new Dimension(150, 40));
-        submitButton.setFocusPainted(false);
-        submitButton.setOpaque(true);
-        submitButton.setContentAreaFilled(true);
+        JLabel passwordLabel = new JLabel("Mot de passe :", SwingConstants.LEFT);
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridy = 3;
+        gbc.insets = new Insets(10, 150, 5, 150);
+        contentPanel.add(passwordLabel, gbc);
 
-        panel.add(Box.createVerticalStrut(20));
-        panel.add(emailLabel);
-        panel.add(emailField);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(passwordLabel);
-        panel.add(passwordField);
-        panel.add(Box.createVerticalStrut(20));
-        panel.add(submitButton);
+        JPasswordField passwordField = new JPasswordField(20); // Pas besoin de dimension spécifique
+        gbc.gridy = 4;
+        passwordField.setPreferredSize(new Dimension(400, 100));
+        contentPanel.add(passwordField, gbc);
 
-        frame.add(containerPanel);
+        JButton submitButton = new JButton("Se connecter");
+        gbc.gridy = 5;
+        gbc.insets = new Insets(30, 750, 30, 750);
+        contentPanel.add(submitButton, gbc);
+
+        JLabel signupRedirect = new JLabel("Pas encore inscrit ? ");
+        signupRedirect.setFont(new Font("Arial", Font.PLAIN, 12));
+        signupRedirect.setForeground(Color.BLACK);
+
+        JButton signupButton = new JButton("S'inscrire");
+        signupButton.addActionListener(e -> {
+            frame.dispose();
+            new Inscription().afficherInscription();
+        });
+
+        JPanel signupPanel = new JPanel();
+        signupPanel.setBackground(new Color(242, 242, 242));
+        signupPanel.add(signupRedirect);
+        signupPanel.add(signupButton);
+        gbc.gridy = 6;
+        contentPanel.add(signupPanel, gbc);
+
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+        frame.add(mainPanel);
         frame.setVisible(true);
 
-        submitButton.addActionListener(e -> handleConnexion(emailField.getText(), new String(passwordField.getPassword())));
+        submitButton.addActionListener(e -> {
+            handleConnexion(emailField.getText(), new String(passwordField.getPassword()), frame);
+        });
     }
 
-    private void handleConnexion(String email, String password) {
-        if (email == null || email.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Veuillez entrer un email.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    private void handleConnexion(String email, String password, JFrame frame) {
+        if (email.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Email manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (password == null || password.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Veuillez entrer un mot de passe.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Mot de passe manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -91,51 +143,27 @@ public class Connexion {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            if (!isEmailInDatabase(connection, email)) {
-                JOptionPane.showMessageDialog(null, "L'email n'existe pas dans la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                return;
+            String query = "SELECT password FROM users WHERE email = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                stmt.setString(1, email);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    String storedPassword = rs.getString("password");
+                    if (BCrypt.checkpw(password, storedPassword)) {
+                        JOptionPane.showMessageDialog(null, "Connexion réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                        frame.dispose();
+                        // Ouvrir la fenêtre principale après connexion
+                        new Main().createMainFrame();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Mot de passe incorrect.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Email non trouvé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
             }
-
-            if (!isPasswordCorrect(connection, email, password)) {
-                JOptionPane.showMessageDialog(null, "Mot de passe incorrect.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            JOptionPane.showMessageDialog(null, "Connexion réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private boolean isEmailInDatabase(Connection connection, String email) throws SQLException {
-        String query = "SELECT COUNT(*) FROM users WHERE email = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, email);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt(1) > 0;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isPasswordCorrect(Connection connection, String email, String password) throws SQLException {
-        String query = "SELECT password FROM users WHERE email = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, email);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    String hashedPassword = resultSet.getString("password");
-                    return BCrypt.checkpw(password, hashedPassword);
-                }
-            }
-        }
-        return false;
-    }
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Connexion().afficherConnexion());
     }
 }

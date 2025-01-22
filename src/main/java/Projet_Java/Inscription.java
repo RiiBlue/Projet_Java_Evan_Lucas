@@ -2,12 +2,14 @@ package Projet_Java;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import java.io.FileInputStream;
 import java.io.IOException;
-import org.mindrot.jbcrypt.BCrypt;  // Import de BCrypt
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Inscription {
 
@@ -30,63 +32,115 @@ public class Inscription {
         }
 
         JFrame frame = new JFrame("Inscription");
-        frame.setSize(600, 400); // Taille de la fenêtre
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null); // Centrer la fenêtre à l'écran
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Affichage vertical de tout les panels
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(242, 242, 242));
-        panel.setPreferredSize(new Dimension(400, 300)); // Limiter la taille du panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // Panel centré
-        JPanel containerPanel = new JPanel(new GridBagLayout());
-        containerPanel.setBackground(new Color(242, 242, 242));
+        JPanel navBar = new JPanel();
+        navBar.setBackground(new Color(33, 37, 41)); // Couleur sombre pour la navbar
+        navBar.setLayout(new FlowLayout(FlowLayout.LEFT)); // Aligner à droite
+        JButton homeButton = new JButton("Accueil");
+        homeButton.setBackground(new Color(0, 123, 255)); // Bleu
+        homeButton.setForeground(Color.WHITE);
+        homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // Action du bouton Accueil
+        homeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Fermer la fenêtre actuelle
+                frame.dispose();
+                // Ouvrir la fenêtre principale
+                new Main().createMainFrame();
+            }
+        });
+        navBar.add(homeButton);
+        mainPanel.add(navBar, BorderLayout.NORTH);
+
+
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setBackground(new Color(242, 242, 242));
         GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 50, 5, 50);
+        gbc.weightx = 1;
+
+        JLabel title = new JLabel("Inscription", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        containerPanel.add(panel, gbc);
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(30, 50, 30, 50);
+        contentPanel.add(title, gbc);
 
-        JLabel nameLabel = new JLabel("Nom de l'entreprise :");
+        JLabel nameLabel = new JLabel("Nom de l'entreprise :", SwingConstants.LEFT);
+        nameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.insets = new Insets(10, 150, 5, 150);
+        contentPanel.add(nameLabel, gbc);
+
         JTextField nameField = new JTextField(20);
+        nameField.setPreferredSize(new Dimension(nameField.getPreferredSize().width, 100));
+        gbc.gridy = 2;
+        contentPanel.add(nameField, gbc);
 
-        JLabel emailLabel = new JLabel("Email :");
+        JLabel emailLabel = new JLabel("Email :", SwingConstants.LEFT);
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridy = 3;
+        gbc.insets = new Insets(10, 150, 5, 150);
+        contentPanel.add(emailLabel, gbc);
+
         JTextField emailField = new JTextField(20);
+        emailField.setPreferredSize(new Dimension(emailField.getPreferredSize().width, 100));
+        gbc.gridy = 4;
+        contentPanel.add(emailField, gbc);
 
-        JLabel passwordLabel = new JLabel("Mot de passe :");
+        JLabel passwordLabel = new JLabel("Mot de passe :", SwingConstants.LEFT);
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        gbc.gridy = 5;
+        gbc.insets = new Insets(10, 150, 5, 150);
+        contentPanel.add(passwordLabel, gbc);
+
         JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setPreferredSize(new Dimension(passwordField.getPreferredSize().width, 100));
+        gbc.gridy = 6;
+        contentPanel.add(passwordField, gbc);
 
-        // Tout les trucs du boutons
         JButton submitButton = new JButton("S'inscrire");
-        submitButton.setBackground(Color.WHITE); // Fond blanc
-        submitButton.setForeground(Color.BLACK); // Texte noir
-        submitButton.setFont(new Font("Arial", Font.BOLD, 16));
-        submitButton.setPreferredSize(new Dimension(150, 40));
-        submitButton.setFocusPainted(false);
-        submitButton.setOpaque(true); // On s'assure que le fond du bouton est totalement opaque
-        submitButton.setContentAreaFilled(true); // On désactive les zones de remplissage transparentes
+        gbc.gridy = 7;
+        gbc.insets = new Insets(30, 750, 30, 750);
+        contentPanel.add(submitButton, gbc);
 
-        // Pour espacement et ajustement des blocs
-        panel.add(Box.createVerticalStrut(20)); // Espacement
-        panel.add(nameLabel);
-        panel.add(nameField);
-        panel.add(Box.createVerticalStrut(10)); // Espacement
-        panel.add(emailLabel);
-        panel.add(emailField);
-        panel.add(Box.createVerticalStrut(10)); // Espacement
-        panel.add(passwordLabel);
-        panel.add(passwordField);
-        panel.add(Box.createVerticalStrut(20)); // Espacement
-        panel.add(submitButton);
+        JLabel loginRedirect = new JLabel("Déjà inscrit ? ");
+        loginRedirect.setFont(new Font("Arial", Font.PLAIN, 12));
+        loginRedirect.setForeground(Color.BLACK);
 
-        frame.add(containerPanel);
+        JButton loginButton = new JButton("Connexion");
+        loginButton.addActionListener(e -> {
+            frame.dispose();
+            new Connexion().afficherConnexion();
+        });
+
+        JPanel loginPanel = new JPanel();
+        loginPanel.setBackground(new Color(242, 242, 242));
+        loginPanel.add(loginRedirect);
+        loginPanel.add(loginButton);
+        gbc.gridy = 8;
+        contentPanel.add(loginPanel, gbc);
+
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+        frame.add(mainPanel);
         frame.setVisible(true);
 
-        submitButton.addActionListener(e -> handleInscription(nameField.getText(), emailField.getText(), new String(passwordField.getPassword())));
+        submitButton.addActionListener(e -> {
+            handleInscription(nameField.getText(), emailField.getText(), new String(passwordField.getPassword()), frame);
+        });
     }
 
-    private void handleInscription(String name, String email, String password) {
+    private void handleInscription(String name, String email, String password, JFrame frame) {
         if (name.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nom de l'entreprise manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
@@ -107,24 +161,22 @@ public class Inscription {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            // Vérification de la liste blanche
             if (!isEmailInWhitelist(connection, email)) {
                 JOptionPane.showMessageDialog(null, "L'email n'est pas sur liste blanche.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Vérification des doublons d'email
             if (isEmailAlreadyUsed(connection, email)) {
                 JOptionPane.showMessageDialog(null, "Cet email est déjà utilisé.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Hashage du mot de passe avec BCrypt
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-
-            // Insertion dans la base de données avec le mot de passe hashé
             insertUser(connection, name, email, hashedPassword);
             JOptionPane.showMessageDialog(null, "Inscription réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+
+            frame.dispose();
+            new Connexion().afficherConnexion();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -132,12 +184,10 @@ public class Inscription {
         }
     }
 
-    // Vérifie si l'email est valide
     private boolean isValidEmail(String email) {
         return Pattern.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email);
     }
 
-    // Vérifie si le mot de passe est valide
     private boolean isValidPassword(String password) {
         return password.length() >= 8 &&
                 Pattern.compile(".*[A-Z].*").matcher(password).find() &&
@@ -146,7 +196,6 @@ public class Inscription {
                 Pattern.compile(".*[!@#$%^&*(),.?\\\":{}|<>].*").matcher(password).find();
     }
 
-    // Vérifie si l'email est dans la liste blanche
     private boolean isEmailInWhitelist(Connection connection, String email) throws SQLException {
         String query = "SELECT COUNT(*) FROM white_list WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -156,7 +205,6 @@ public class Inscription {
         }
     }
 
-    // Vérifie si l'email est déjà utilisé
     private boolean isEmailAlreadyUsed(Connection connection, String email) throws SQLException {
         String query = "SELECT COUNT(*) FROM users WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -166,7 +214,6 @@ public class Inscription {
         }
     }
 
-    // Insère l'utilisateur dans la base de données
     private void insertUser(Connection connection, String name, String email, String password) throws SQLException {
         String query = "INSERT INTO users (name_compagny, email, password) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -175,10 +222,5 @@ public class Inscription {
             stmt.setString(3, password);
             stmt.executeUpdate();
         }
-    }
-
-    // Lancement du main
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Inscription().afficherInscription());
     }
 }
