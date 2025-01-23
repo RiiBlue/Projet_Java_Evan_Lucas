@@ -74,8 +74,8 @@ public class Inscription {
         gbc.insets = new Insets(30, 50, 30, 50);
         contentPanel.add(title, gbc);
 
-        JLabel nameLabel = new JLabel("Nom de l'entreprise :", SwingConstants.LEFT);
-        nameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        JLabel nameLabel = new JLabel("Pseudo :", SwingConstants.LEFT);
+        nameLabel.setFont(new Font("Arial", Font.PLAIN, 25));
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.insets = new Insets(10, 150, 5, 150);
@@ -87,7 +87,7 @@ public class Inscription {
         contentPanel.add(nameField, gbc);
 
         JLabel emailLabel = new JLabel("Email :", SwingConstants.LEFT);
-        emailLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 25));
         gbc.gridy = 3;
         gbc.insets = new Insets(10, 150, 5, 150);
         contentPanel.add(emailLabel, gbc);
@@ -98,7 +98,7 @@ public class Inscription {
         contentPanel.add(emailField, gbc);
 
         JLabel passwordLabel = new JLabel("Mot de passe :", SwingConstants.LEFT);
-        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 25));
         gbc.gridy = 5;
         gbc.insets = new Insets(10, 150, 5, 150);
         contentPanel.add(passwordLabel, gbc);
@@ -215,7 +215,7 @@ public class Inscription {
     }
 
     private void insertUser(Connection connection, String name, String email, String password) throws SQLException {
-        String query = "INSERT INTO users (name_compagny, email, password) VALUES (?, ?, ?)";
+        String query = "INSERT INTO users (pseudo, email, password) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, name);
             stmt.setString(2, email);
