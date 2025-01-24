@@ -1,3 +1,4 @@
+
 package Projet_Java;
 
 import javax.swing.*;
@@ -6,15 +7,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.io.FileInputStream;
 import java.io.IOException;
 import org.mindrot.jbcrypt.BCrypt;
 
-public class Connexion {
+public class WhiteList {
 
     private Properties dbProperties;
 
-    public Connexion() {
+    public WhiteList() {
         dbProperties = new Properties();
         try (FileInputStream fis = new FileInputStream("C:\\Users\\geret\\IdeaProjects\\Projet_Java_Evan_Lucas\\src\\main\\resources\\db.properties")) {
             dbProperties.load(fis);
@@ -23,14 +25,14 @@ public class Connexion {
         }
     }
 
-    public void afficherConnexion() {
+    public void afficherWhiteList() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        JFrame frame = new JFrame("Connexion");
+        JFrame frame = new JFrame("WhiteList");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
@@ -47,15 +49,14 @@ public class Connexion {
         homeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Fermer la fenêtre actuelle
                 frame.dispose();
-                // Ouvrir la fenêtre principale
                 String email = "";
                 new Main().createMainFrame(email);
             }
         });
         navBar.add(homeButton);
         mainPanel.add(navBar, BorderLayout.NORTH);
+
 
         JPanel contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(new Color(242, 242, 242));
@@ -64,7 +65,7 @@ public class Connexion {
         gbc.insets = new Insets(5, 50, 5, 50);
         gbc.weightx = 1;
 
-        JLabel title = new JLabel("Connexion", SwingConstants.CENTER);
+        JLabel title = new JLabel("White Liste", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 24));
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -73,49 +74,20 @@ public class Connexion {
         contentPanel.add(title, gbc);
 
         JLabel emailLabel = new JLabel("Email :", SwingConstants.LEFT);
-        emailLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 25));
+        gbc.gridy = 3;
         gbc.insets = new Insets(10, 150, 5, 150);
         contentPanel.add(emailLabel, gbc);
 
-        JTextField emailField = new JTextField(20); // Pas besoin de dimension spécifique
-        gbc.gridy = 2;
-        emailField.setPreferredSize(new Dimension(400, 100)); // Ajuste la taille
+        JTextField emailField = new JTextField(20);
+        emailField.setPreferredSize(new Dimension(emailField.getPreferredSize().width, 100));
+        gbc.gridy = 4;
         contentPanel.add(emailField, gbc);
 
-        JLabel passwordLabel = new JLabel("Mot de passe :", SwingConstants.LEFT);
-        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-        gbc.gridy = 3;
-        gbc.insets = new Insets(10, 150, 5, 150);
-        contentPanel.add(passwordLabel, gbc);
-
-        JPasswordField passwordField = new JPasswordField(20); // Pas besoin de dimension spécifique
-        gbc.gridy = 4;
-        passwordField.setPreferredSize(new Dimension(400, 100));
-        contentPanel.add(passwordField, gbc);
-
-        JButton submitButton = new JButton("Se connecter");
-        gbc.gridy = 5;
+        JButton submitButton = new JButton("Ajouter");
+        gbc.gridy = 7;
         gbc.insets = new Insets(30, 750, 30, 750);
         contentPanel.add(submitButton, gbc);
-
-        JLabel signupRedirect = new JLabel("Pas encore inscrit ? ");
-        signupRedirect.setFont(new Font("Arial", Font.PLAIN, 12));
-        signupRedirect.setForeground(Color.BLACK);
-
-        JButton signupButton = new JButton("S'inscrire");
-        signupButton.addActionListener(e -> {
-            frame.dispose();
-            new Inscription().afficherInscription();
-        });
-
-        JPanel signupPanel = new JPanel();
-        signupPanel.setBackground(new Color(242, 242, 242));
-        signupPanel.add(signupRedirect);
-        signupPanel.add(signupButton);
-        gbc.gridy = 6;
-        contentPanel.add(signupPanel, gbc);
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
@@ -123,18 +95,13 @@ public class Connexion {
         frame.setVisible(true);
 
         submitButton.addActionListener(e -> {
-            handleConnexion(emailField.getText(), new String(passwordField.getPassword()), frame);
+            handleWhiteList(emailField.getText(), frame);
         });
     }
 
-    private void handleConnexion(String email, String password, JFrame frame) {
-        if (email.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Email manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (password.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Mot de passe manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
+    private void handleWhiteList(String email, JFrame frame) {
+        if (!isValidEmail(email)) {
+            JOptionPane.showMessageDialog(null, "Veuillez entrer un email valide.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -143,27 +110,40 @@ public class Connexion {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            String query = "SELECT password FROM users WHERE email = ?";
-            try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                stmt.setString(1, email);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    String storedPassword = rs.getString("password");
-                    if (BCrypt.checkpw(password, storedPassword)) {
-                        JOptionPane.showMessageDialog(null, "Connexion réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-                        frame.dispose();
-                        // Ouvrir la fenêtre principale après connexion
-                        new Main().createMainFrame(email);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Mot de passe incorrect.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Email non trouvé.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                }
+            if (isEmailInWhitelist(connection, email)) {
+                JOptionPane.showMessageDialog(null, "L'email est déjà sur la liste blanche.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+
+            insertUser(connection, email);
+            JOptionPane.showMessageDialog(null, "Email ajouté avec succès à la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    private void insertUser(Connection connection, String email) throws SQLException {
+        String query = "INSERT INTO white_list (email) VALUES (?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email);
+            stmt.executeUpdate();
+        }
+    }
+
+    private boolean isEmailInWhitelist(Connection connection, String email) throws SQLException {
+        String query = "SELECT COUNT(*) FROM white_list WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        }
+    }
+
+    private boolean isValidEmail(String email) {
+        return Pattern.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", email);
+    }
 }
+

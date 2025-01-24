@@ -15,6 +15,10 @@ public class Inscription {
 
     private Properties dbProperties;
 
+    public static void main(String[] args) {
+        new Inscription().afficherInscription();  // Créer la fenêtre principale
+    }
+
     public Inscription() {
         dbProperties = new Properties();
         try (FileInputStream fis = new FileInputStream("C:\\Users\\geret\\IdeaProjects\\Projet_Java_Evan_Lucas\\src\\main\\resources\\db.properties")) {
@@ -52,7 +56,8 @@ public class Inscription {
                 // Fermer la fenêtre actuelle
                 frame.dispose();
                 // Ouvrir la fenêtre principale
-                new Main().createMainFrame();
+                String email = "";
+                new Main().createMainFrame(email);
             }
         });
         navBar.add(homeButton);

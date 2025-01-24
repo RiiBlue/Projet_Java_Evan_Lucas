@@ -4,39 +4,45 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Properties;
 
 public class Main {
 
     private JFrame frame;
+    private Properties dbProperties;
 
-    public static void main(String[] args) {
-        new Main().createMainFrame();  // Créer la fenêtre principale
+    public Main() {
+        dbProperties = new Properties();
+        try {
+            dbProperties.load(getClass().getResourceAsStream("/db.properties"));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erreur de chargement des propriétés de la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
-    public void createMainFrame() {
-        // Créer la fenêtre principale
+    public void createMainFrame(String email) {
         frame = new JFrame("Accueil");
-        frame.setSize(800, 600); // Taille de la fenêtre
+        frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLocationRelativeTo(null); // Centrer la fenêtre
+        frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Création du JPanel principal avec un BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
         frame.add(mainPanel);
 
-        // Création de la barre de navigation
         JPanel navBar = new JPanel();
-        navBar.setBackground(new Color(33, 37, 41)); // Couleur sombre pour la navbar
-        navBar.setLayout(new FlowLayout(FlowLayout.RIGHT)); // Aligner à droite
+        navBar.setBackground(new Color(33, 37, 41));
+        navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        // Création du bouton Inscription
+        // Bouton Inscription
         JButton inscriptionButton = new JButton("Inscription");
-        inscriptionButton.setBackground(new Color(0, 123, 255)); // Bleu
+        inscriptionButton.setBackground(new Color(0, 123, 255));
         inscriptionButton.setForeground(Color.WHITE);
         inscriptionButton.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        // Action du bouton Inscription
         inscriptionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -45,13 +51,48 @@ public class Main {
             }
         });
 
-        // Ajouter le bouton à la navbar
         navBar.add(inscriptionButton);
 
-        // Ajouter la navbar à la fenêtre principale
-        mainPanel.add(navBar, BorderLayout.NORTH);
+        // Vérifiez le rôle de l'utilisateur
+        String role = getUserRole(email);
 
-        // Afficher la fenêtre
+        if ("administrateur".equals(role)) {
+            JButton whiteListButton = new JButton("Liste blanche");
+            whiteListButton.setBackground(new Color(0, 123, 255));
+            whiteListButton.setForeground(Color.WHITE);
+            whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            whiteListButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    frame.dispose();
+                    new WhiteList().afficherWhiteList();
+                }
+            });
+            navBar.add(whiteListButton);
+        }
+
+        mainPanel.add(navBar, BorderLayout.NORTH);
         frame.setVisible(true);
+    }
+
+    private String getUserRole(String email) {
+        try (Connection connection = DriverManager.getConnection(
+                dbProperties.getProperty("db.url"),
+                dbProperties.getProperty("db.username"),
+                dbProperties.getProperty("db.password"))) {
+
+            String query = "SELECT rôle FROM users WHERE email = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                stmt.setString(1, email);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("rôle");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erreur lors de la vérification du rôle de l'utilisateur.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
     }
 }
