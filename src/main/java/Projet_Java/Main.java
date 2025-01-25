@@ -57,6 +57,7 @@ public class Main {
         String role = getUserRole(email);
 
         if ("administrateur".equals(role)) {
+            // Bouton pour la liste blanche
             JButton whiteListButton = new JButton("Liste blanche");
             whiteListButton.setBackground(new Color(0, 123, 255));
             whiteListButton.setForeground(Color.WHITE);
@@ -69,10 +70,25 @@ public class Main {
                 }
             });
             navBar.add(whiteListButton);
+
+            // Bouton pour gérer les employés
+            JButton manageEmployeeButton = new JButton("Gérer Employés");
+            manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
+            manageEmployeeButton.setForeground(Color.WHITE);
+            manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            manageEmployeeButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    frame.dispose();
+                    new ManageEmployee().afficherManageEmployee(); // Appel à la méthode pour afficher la page ManageEmployee
+                }
+            });
+            navBar.add(manageEmployeeButton);
         }
 
         mainPanel.add(navBar, BorderLayout.NORTH);
         frame.setVisible(true);
+
     }
 
     private String getUserRole(String email) {

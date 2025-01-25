@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : jeu. 23 jan. 2025 à 16:30
+-- Généré le : sam. 25 jan. 2025 à 17:00
 -- Version du serveur : 8.2.0
 -- Version de PHP : 8.2.13
 
@@ -61,7 +61,15 @@ CREATE TABLE IF NOT EXISTS `store` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name_store` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `store`
+--
+
+INSERT INTO `store` (`id`, `name_store`) VALUES
+(1, 'Amazon'),
+(2, 'Fnac');
 
 -- --------------------------------------------------------
 
@@ -75,7 +83,15 @@ CREATE TABLE IF NOT EXISTS `store_employees` (
   `store_id` int NOT NULL,
   `user_id` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `store_employees`
+--
+
+INSERT INTO `store_employees` (`id`, `store_id`, `user_id`) VALUES
+(4, 1, 4),
+(5, 1, 4);
 
 -- --------------------------------------------------------
 
@@ -91,15 +107,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `rôle` enum('employé','administrateur') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'employé',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Déchargement des données de la table `users`
 --
 
 INSERT INTO `users` (`id`, `pseudo`, `email`, `password`, `rôle`) VALUES
-(1, '', 'administrateur@istore.fr', 'AdminIstore123@', 'administrateur'),
-(3, 'caca', 'justine.dupin@amazon.fr', '$2a$10$qH3JFa7fnAvW2Hmq8yoOe.LoMwJJBGaJfN1PWZSzJBIG1kF64MYjy', 'employé');
+(1, 'admin', 'administrateur@istore.fr', '$2a$10$rfOo/CIDqipBUy8kDqdVE.v5jDhKCgjrwuvgbuxaAIEHWiRXvwDOy', 'administrateur'),
+(4, 'juju', 'justine.dupin@amazon.fr', '$2a$10$xP0GBisI9.LoiKZp5M4u6Ogrnh1UNfXE9syxw7pPG8z7I0u.7bluK', 'employé');
 
 -- --------------------------------------------------------
 
@@ -118,7 +134,9 @@ CREATE TABLE IF NOT EXISTS `white_list` (
 
 INSERT INTO `white_list` (`email`) VALUES
 ('administrateur@istore.fr'),
-('justine.dupin@amazon.fr');
+('justine.dupin@amazon.fr'),
+('employe@fnac.fr'),
+('lucas.db@gmail.com');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
