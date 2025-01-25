@@ -68,7 +68,6 @@ public class ManageEmployee {
         gbc.insets = new Insets(30, 50, 30, 50);
         contentPanel.add(title, gbc);
 
-        // Ajouter un combo box pour sélectionner un magasin
         JLabel storeLabel = new JLabel("Sélectionner un magasin:");
         gbc.gridy = 1;
         contentPanel.add(storeLabel, gbc);
@@ -77,10 +76,8 @@ public class ManageEmployee {
         gbc.gridy = 2;
         contentPanel.add(storeComboBox, gbc);
 
-        // Remplir le combo box avec les magasins
         loadStores(storeComboBox);
 
-        // Ajouter un combo box pour sélectionner un email
         JLabel emailLabel = new JLabel("Sélectionner un employé (Email):");
         gbc.gridy = 3;
         contentPanel.add(emailLabel, gbc);
@@ -89,10 +86,8 @@ public class ManageEmployee {
         gbc.gridy = 4;
         contentPanel.add(emailComboBox, gbc);
 
-        // Remplir le combo box avec les emails des employés
         loadEmployeeEmails(emailComboBox);
 
-        // Ajouter le bouton Mettre à jour
         JButton updateButton = new JButton("Mettre à jour");
         gbc.gridy = 5;
         gbc.insets = new Insets(20, 150, 20, 150);
@@ -115,10 +110,9 @@ public class ManageEmployee {
                     if (storeId != -1 && employeeId != -1) {
                         updateEmployeeStore(employeeId, storeId);
 
-                        // Actualiser la page en fermant et rouvrant la fenêtre
                         JOptionPane.showMessageDialog(null, "Employé ajouté au magasin avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-                        frame.dispose(); // Fermer la fenêtre actuelle
-                        new ManageEmployee().afficherManageEmployee(); // Créer une nouvelle instance et afficher
+                        frame.dispose();
+                        new ManageEmployee().afficherManageEmployee();
                     } else {
                         JOptionPane.showMessageDialog(null, "Erreur : impossible de lier l'employé au magasin.", "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
@@ -133,7 +127,7 @@ public class ManageEmployee {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            String query = "SELECT name_store FROM store"; // Modifier selon votre table de magasins
+            String query = "SELECT name_store FROM store";
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(query);
 
@@ -152,7 +146,7 @@ public class ManageEmployee {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            String query = "SELECT email FROM users WHERE rôle = 'employé'"; // Modifier selon votre table des utilisateurs
+            String query = "SELECT email FROM users WHERE rôle = 'employé'";
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(query);
 
@@ -181,7 +175,7 @@ public class ManageEmployee {
             pstmt.setString(1, email);
             ResultSet rs = pstmt.executeQuery();
 
-            return rs.next(); // Si un résultat existe, l'employé est déjà lié à un magasin
+            return rs.next();
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
