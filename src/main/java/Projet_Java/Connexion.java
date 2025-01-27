@@ -16,11 +16,14 @@ public class Connexion {
 
     public Connexion() {
         dbProperties = new Properties();
-        try (FileInputStream fis = new FileInputStream("C:\\Users\\geret\\IdeaProjects\\Projet_Java_Evan_Lucas\\src\\main\\resources\\db.properties")) {
-            dbProperties.load(fis);
-        } catch (IOException e) {
+        try {
+            dbProperties.load(getClass().getResourceAsStream("/db.properties"));
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erreur de chargement des propriétés de la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    public static void main(String[] args) {
+        new Connexion().afficherConnexion();
     }
 
     public void afficherConnexion() {
@@ -47,9 +50,7 @@ public class Connexion {
         homeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Fermer la fenêtre actuelle
                 frame.dispose();
-                // Ouvrir la fenêtre principale
                 String email = "";
                 new Main().createMainFrame(email);
             }
@@ -143,16 +144,19 @@ public class Connexion {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            String query = "SELECT password FROM users WHERE email = ?";
+            String query = "SELECT password, rôle, pseudo FROM users WHERE email = ?";
             try (PreparedStatement stmt = connection.prepareStatement(query)) {
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     String storedPassword = rs.getString("password");
                     if (BCrypt.checkpw(password, storedPassword)) {
+                        String role = rs.getString("rôle");
+                        String pseudo = rs.getString("pseudo");
+                        SessionManager.startSession(email, role, pseudo);
+
                         JOptionPane.showMessageDialog(null, "Connexion réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
                         frame.dispose();
-                        // Ouvrir la fenêtre principale après connexion
                         new Main().createMainFrame(email);
                     } else {
                         JOptionPane.showMessageDialog(null, "Mot de passe incorrect.", "Erreur", JOptionPane.ERROR_MESSAGE);

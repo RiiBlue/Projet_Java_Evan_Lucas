@@ -15,15 +15,11 @@ public class Inscription {
 
     private Properties dbProperties;
 
-    public static void main(String[] args) {
-        new Inscription().afficherInscription();  // Créer la fenêtre principale
-    }
-
     public Inscription() {
         dbProperties = new Properties();
-        try (FileInputStream fis = new FileInputStream("C:\\Users\\geret\\IdeaProjects\\Projet_Java_Evan_Lucas\\src\\main\\resources\\db.properties")) {
-            dbProperties.load(fis);
-        } catch (IOException e) {
+        try {
+            dbProperties.load(getClass().getResourceAsStream("/db.properties"));
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erreur de chargement des propriétés de la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -49,13 +45,10 @@ public class Inscription {
         homeButton.setForeground(Color.WHITE);
         homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        // Action du bouton Accueil
         homeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Fermer la fenêtre actuelle
                 frame.dispose();
-                // Ouvrir la fenêtre principale
                 String email = "";
                 new Main().createMainFrame(email);
             }

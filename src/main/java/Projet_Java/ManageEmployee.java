@@ -15,9 +15,9 @@ public class ManageEmployee {
 
     public ManageEmployee() {
         dbProperties = new Properties();
-        try (FileInputStream fis = new FileInputStream("C:\\Users\\geret\\IdeaProjects\\Projet_Java_Evan_Lucas\\src\\main\\resources\\db.properties")) {
-            dbProperties.load(fis);
-        } catch (IOException e) {
+        try {
+            dbProperties.load(getClass().getResourceAsStream("/db.properties"));
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erreur de chargement des propriétés de la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -27,6 +27,12 @@ public class ManageEmployee {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if (!SessionManager.isLoggedIn() || !"administrateur".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(null, "Accès non autorisé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            new Main().createMainFrame("");
+            return;
         }
 
         JFrame frame = new JFrame("Manage Employees");
@@ -46,8 +52,7 @@ public class ManageEmployee {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
-                String email = "";
-                new Main().createMainFrame(email);
+                new Main().createMainFrame(SessionManager.getCurrentUserEmail());
             }
         });
         navBar.add(homeButton);

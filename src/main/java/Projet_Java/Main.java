@@ -38,7 +38,6 @@ public class Main {
         navBar.setBackground(new Color(33, 37, 41));
         navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        // Bouton Inscription
         JButton inscriptionButton = new JButton("Inscription");
         inscriptionButton.setBackground(new Color(0, 123, 255));
         inscriptionButton.setForeground(Color.WHITE);
@@ -53,11 +52,9 @@ public class Main {
 
         navBar.add(inscriptionButton);
 
-        // Vérifiez le rôle de l'utilisateur
         String role = getUserRole(email);
 
         if ("administrateur".equals(role)) {
-            // Bouton pour la liste blanche
             JButton whiteListButton = new JButton("Liste blanche");
             whiteListButton.setBackground(new Color(0, 123, 255));
             whiteListButton.setForeground(Color.WHITE);
@@ -71,7 +68,6 @@ public class Main {
             });
             navBar.add(whiteListButton);
 
-            // Bouton pour gérer les employés
             JButton manageEmployeeButton = new JButton("Gérer Employés");
             manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
             manageEmployeeButton.setForeground(Color.WHITE);
@@ -88,6 +84,27 @@ public class Main {
 
         mainPanel.add(navBar, BorderLayout.NORTH);
         frame.setVisible(true);
+
+        JButton logoutButton = new JButton("Déconnexion");
+        logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SessionManager.endSession();
+                frame.dispose();
+                new Connexion().afficherConnexion();
+            }
+        });
+
+        if (SessionManager.isLoggedIn()) {
+            navBar.add(logoutButton);
+            JLabel userLabel = new JLabel("Connecté en tant que : " + SessionManager.getCurrentUserPseudo());
+            userLabel.setForeground(Color.WHITE);
+            userLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            navBar.add(userLabel);
+        }
 
     }
 
