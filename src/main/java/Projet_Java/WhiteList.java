@@ -94,6 +94,21 @@ public class WhiteList {
         gbc.insets = new Insets(30, 750, 30, 750);
         contentPanel.add(submitButton, gbc);
 
+        JLabel employeeLabel = new JLabel("Sélectionner un employé:");
+        gbc.gridy = 1;
+        contentPanel.add(employeeLabel, gbc);
+
+        JComboBox<String> employeeComboBox = new JComboBox<>();
+        gbc.gridy = 2;
+        contentPanel.add(employeeComboBox, gbc);
+
+        JButton deleteButton = new JButton("Retirer");
+        gbc.gridy = 7;
+        gbc.insets = new Insets(-30, 750, 30, 750);
+        contentPanel.add(deleteButton, gbc);
+
+        loadEmployee(employeeComboBox);
+
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         frame.add(mainPanel);
@@ -102,6 +117,29 @@ public class WhiteList {
         submitButton.addActionListener(e -> {
             handleWhiteList(emailField.getText(), frame);
         });
+
+        deleteButton.addActionListener(e -> {
+            delWhiteList(employeeComboBox.getSelectedItem().toString(), frame);
+        });
+    }
+
+    private void loadEmployee(JComboBox<String> storeComboBox) {
+        try (Connection connection = DriverManager.getConnection(
+                dbProperties.getProperty("db.url"),
+                dbProperties.getProperty("db.username"),
+                dbProperties.getProperty("db.password"))) {
+
+            String query = "SELECT email FROM white_list WHERE email != 'administrateur@istore.fr'";
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                storeComboBox.addItem(rs.getString("email"));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void handleWhiteList(String email, JFrame frame) {
@@ -123,6 +161,24 @@ public class WhiteList {
             insertUser(connection, email);
             JOptionPane.showMessageDialog(null, "Email ajouté avec succès à la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
             frame.dispose();
+            new WhiteList().afficherWhiteList();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void delWhiteList(String email, JFrame frame) {
+        try (Connection connection = DriverManager.getConnection(
+                dbProperties.getProperty("db.url"),
+                dbProperties.getProperty("db.username"),
+                dbProperties.getProperty("db.password"))) {
+
+            deleteUser(connection, email);
+            JOptionPane.showMessageDialog(null, "Email supprimé avec succès de la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+            new WhiteList().afficherWhiteList();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -132,6 +188,14 @@ public class WhiteList {
 
     private void insertUser(Connection connection, String email) throws SQLException {
         String query = "INSERT INTO white_list (email) VALUES (?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email);
+            stmt.executeUpdate();
+        }
+    }
+
+    private void deleteUser(Connection connection, String email) throws SQLException {
+        String query = "DELETE FROM white_list WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, email);
             stmt.executeUpdate();

@@ -38,26 +38,12 @@ public class Main {
         navBar.setBackground(new Color(33, 37, 41));
         navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        JButton inscriptionButton = new JButton("Inscription");
-        inscriptionButton.setBackground(new Color(0, 123, 255));
-        inscriptionButton.setForeground(Color.WHITE);
-        inscriptionButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        inscriptionButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                new Inscription().afficherInscription();
-            }
-        });
-
-        navBar.add(inscriptionButton);
-
         String role = getUserRole(email);
 
         if ("administrateur".equals(role)) {
             JButton whiteListButton = new JButton("Liste blanche");
             whiteListButton.setBackground(new Color(0, 123, 255));
-            whiteListButton.setForeground(Color.WHITE);
+            whiteListButton.setForeground(new Color(0, 123, 255));
             whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
             whiteListButton.addActionListener(new ActionListener() {
                 @Override
@@ -70,7 +56,7 @@ public class Main {
 
             JButton manageEmployeeButton = new JButton("Gérer Employés");
             manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
-            manageEmployeeButton.setForeground(Color.WHITE);
+            manageEmployeeButton.setForeground(new Color(40, 167, 69));
             manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
             manageEmployeeButton.addActionListener(new ActionListener() {
                 @Override
@@ -82,12 +68,25 @@ public class Main {
             navBar.add(manageEmployeeButton);
         }
 
+        JButton productButton = new JButton("Produits");
+        productButton.setBackground(new Color(253, 189, 1));
+        productButton.setForeground(new Color(253, 189, 1));
+        productButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        productButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                new Items().afficherItem();
+            }
+        });
+        navBar.add(productButton);
+
         mainPanel.add(navBar, BorderLayout.NORTH);
         frame.setVisible(true);
 
         JButton logoutButton = new JButton("Déconnexion");
         logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
-        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setForeground(new Color(220, 53, 69));
         logoutButton.setFont(new Font("Arial", Font.PLAIN, 14));
         logoutButton.addActionListener(new ActionListener() {
             @Override

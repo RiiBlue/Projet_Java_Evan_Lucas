@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : sam. 25 jan. 2025 à 17:00
+-- Généré le : mar. 28 jan. 2025 à 17:26
 -- Version du serveur : 8.2.0
 -- Version de PHP : 8.2.13
 
@@ -48,7 +48,15 @@ CREATE TABLE IF NOT EXISTS `items` (
   `quantity` int NOT NULL,
   `price` double NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `items`
+--
+
+INSERT INTO `items` (`id`, `name`, `quantity`, `price`) VALUES
+(1, 'Pomme', 92, 7),
+(2, 'Poire', 999, 0.01);
 
 -- --------------------------------------------------------
 
@@ -90,8 +98,7 @@ CREATE TABLE IF NOT EXISTS `store_employees` (
 --
 
 INSERT INTO `store_employees` (`id`, `store_id`, `user_id`) VALUES
-(4, 1, 4),
-(5, 1, 4);
+(4, 1, 4);
 
 -- --------------------------------------------------------
 
