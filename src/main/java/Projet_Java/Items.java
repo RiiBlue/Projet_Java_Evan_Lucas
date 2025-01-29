@@ -45,7 +45,7 @@ public class Items {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
-                new Main().createMainFrame("");
+                new Main().createMainFrame(SessionManager.getCurrentUserEmail());
             }
         });
         navBar.add(homeButton);

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : mar. 28 jan. 2025 à 17:26
+-- Généré le : mer. 29 jan. 2025 à 18:49
 -- Version du serveur : 8.2.0
 -- Version de PHP : 8.2.13
 
@@ -32,8 +32,18 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `id` int NOT NULL AUTO_INCREMENT,
   `item_id` int NOT NULL,
   `store_id` int NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id`),
+  KEY `fk_item_id` (`item_id`),
+  KEY `fk_store_id` (`store_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `inventory`
+--
+
+INSERT INTO `inventory` (`id`, `item_id`, `store_id`) VALUES
+(1, 1, 2),
+(2, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -90,7 +100,9 @@ CREATE TABLE IF NOT EXISTS `store_employees` (
   `id` int NOT NULL AUTO_INCREMENT,
   `store_id` int NOT NULL,
   `user_id` int NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_user_id` (`user_id`),
+  KEY `fk_store_id` (`store_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -98,7 +110,8 @@ CREATE TABLE IF NOT EXISTS `store_employees` (
 --
 
 INSERT INTO `store_employees` (`id`, `store_id`, `user_id`) VALUES
-(4, 1, 4);
+(4, 1, 4),
+(5, 1, 1);
 
 -- --------------------------------------------------------
 

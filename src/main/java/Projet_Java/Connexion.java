@@ -22,6 +22,7 @@ public class Connexion {
             JOptionPane.showMessageDialog(null, "Erreur de chargement des propriétés de la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
+
     public static void main(String[] args) {
         new Connexion().afficherConnexion();
     }
@@ -144,7 +145,7 @@ public class Connexion {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            String query = "SELECT password, rôle, pseudo FROM users WHERE email = ?";
+            String query = "SELECT password, rôle, pseudo, id FROM users WHERE email = ?";
             try (PreparedStatement stmt = connection.prepareStatement(query)) {
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
@@ -153,7 +154,8 @@ public class Connexion {
                     if (BCrypt.checkpw(password, storedPassword)) {
                         String role = rs.getString("rôle");
                         String pseudo = rs.getString("pseudo");
-                        SessionManager.startSession(email, role, pseudo);
+                        int userId = rs.getInt("id");  // Récupérer l'ID
+                        SessionManager.startSession(email, role, pseudo, String.valueOf(userId));  // Passer l'ID à la session
 
                         JOptionPane.showMessageDialog(null, "Connexion réussie !", "Succès", JOptionPane.INFORMATION_MESSAGE);
                         frame.dispose();

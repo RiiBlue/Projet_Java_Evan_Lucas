@@ -34,7 +34,7 @@ public class WhiteList {
 
         if (!SessionManager.isLoggedIn() || !"administrateur".equals(SessionManager.getCurrentUserRole())) {
             JOptionPane.showMessageDialog(null, "Accès non autorisé.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            new Main().createMainFrame("");
+            new Connexion().afficherConnexion();
             return;
         }
 

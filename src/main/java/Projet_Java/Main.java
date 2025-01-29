@@ -81,8 +81,24 @@ public class Main {
         });
         navBar.add(productButton);
 
-        mainPanel.add(navBar, BorderLayout.NORTH);
-        frame.setVisible(true);
+        JButton inventoryButton = new JButton("Inventaire");
+        inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
+        inventoryButton.setForeground(new Color(220, 53, 69));
+        inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        inventoryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (SessionManager.isLoggedIn()) {
+                    frame.dispose();
+                    new Inventory().afficherInventory();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
+                    new Connexion().afficherConnexion();
+                }
+            }
+        });
+        navBar.add(inventoryButton);
+
 
         JButton logoutButton = new JButton("Déconnexion");
         logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
@@ -99,11 +115,14 @@ public class Main {
 
         if (SessionManager.isLoggedIn()) {
             navBar.add(logoutButton);
-            JLabel userLabel = new JLabel("Connecté en tant que : " + SessionManager.getCurrentUserPseudo());
+            JLabel userLabel = new JLabel("Connecté en tant que : " + SessionManager.getCurrentUserPseudo() + SessionManager.getCurrentUserId());
             userLabel.setForeground(Color.WHITE);
             userLabel.setFont(new Font("Arial", Font.PLAIN, 14));
             navBar.add(userLabel);
         }
+
+        mainPanel.add(navBar, BorderLayout.NORTH);
+        frame.setVisible(true);
 
     }
 
