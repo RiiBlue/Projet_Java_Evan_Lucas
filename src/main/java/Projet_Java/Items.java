@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Properties;
 
@@ -38,6 +39,7 @@ public class Items {
         navBar.setLayout(new FlowLayout(FlowLayout.LEFT)); // Aligner à gauche
         JButton homeButton = new JButton("Accueil");
         homeButton.setBackground(new Color(0, 123, 255)); // Bleu
+        homeButton.setForeground(new Color(0, 123, 255));
         homeButton.setForeground(Color.WHITE);
         homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
 
@@ -137,11 +139,19 @@ public class Items {
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            insertItem(connection, name, Double.parseDouble(price), Integer.parseInt(quantity));
+            String user_id = SessionManager.getCurrentUserId();
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO items (name) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, name);
+            stmt.executeUpdate(); // Récupération de l'ID généré
+
+            ResultSet rs = stmt.getGeneratedKeys();
+            int item_id = -1; // Valeur par défaut pour éviter l'erreur
+            String store_id = getStoreIdForUser(connection, user_id);
+            insertItem(connection, item_id, store_id, new BigDecimal(price), Integer.parseInt(quantity));
             JOptionPane.showMessageDialog(null, "Item ajouté avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
 
             frame.dispose();
-            new Main().createMainFrame("");
+            new Main().createMainFrame(SessionManager.getCurrentUserEmail());
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -158,22 +168,35 @@ public class Items {
         }
     }
 
-        private boolean isValidQuantity(String quantity) {
-            try {
-                int parsedQuantity = Integer.parseInt(quantity); // Utiliser Integer.parseInt
-                return parsedQuantity > 0; // Vérifier si la quantité est strictement positive
-            } catch (NumberFormatException e) {
-                return false;
+    private boolean isValidQuantity(String quantity) {
+        try {
+            int parsedQuantity = Integer.parseInt(quantity); // Utiliser Integer.parseInt
+            return parsedQuantity > 0; // Vérifier si la quantité est strictement positive
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private String getStoreIdForUser(Connection connection, String user_id) throws SQLException {
+        String query = "SELECT store_id FROM store_employees WHERE user_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, user_id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("store_id");
             }
         }
+        return null;
+    }
 
-    private void insertItem(Connection connection, String name, double price, int quantity) throws SQLException {
-        String query = "INSERT INTO items (name, price, quantity) VALUES (?, ?, ?)";
+    private void insertItem(Connection connection, int item_id, String store_id, BigDecimal price, int quantity) throws SQLException {
+        String query = "INSERT INTO inventory VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, name);
-            stmt.setDouble(2, price);
-            stmt.setInt(3, quantity);
-            stmt.executeUpdate();
+            stmt.setInt(1, item_id);
+            stmt.setString(2, store_id);
+            stmt.setBigDecimal(3, price);
+            stmt.setInt(4, quantity);
         }
     }
 }
+

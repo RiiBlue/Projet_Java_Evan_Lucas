@@ -60,8 +60,22 @@ public class Inventory {
 
             JPanel navBar = new JPanel();
             navBar.setBackground(new Color(33, 37, 41));
-            navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
+            navBar.setLayout(new FlowLayout(FlowLayout.LEFT));
+            JButton accButton = new JButton("Accueil");
+            accButton.setBackground(new Color(0, 123, 255));
+            accButton.setForeground(new Color(0, 123, 255));
+            accButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            accButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    frame.dispose();
+                    new Main().createMainFrame(SessionManager.getCurrentUserEmail());
+                }
+            });
+            navBar.add(accButton);
+
+            navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
             JButton productButton = new JButton("Produits");
             productButton.setBackground(new Color(253, 189, 1));
             productButton.setForeground(new Color(253, 189, 1));
@@ -95,6 +109,45 @@ public class Inventory {
                 userLabel.setFont(new Font("Arial", Font.PLAIN, 14));
                 navBar.add(userLabel);
             }
+
+            JPanel contentPanel = new JPanel(new GridBagLayout());
+            contentPanel.setBackground(new Color(242, 242, 242));
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.insets = new Insets(5, 50, 5, 50);
+            gbc.weightx = 1;
+
+            JLabel title = new JLabel("Magasins", SwingConstants.CENTER);
+            title.setFont(new Font("Arial", Font.BOLD, 24));
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.gridwidth = 2;
+            gbc.insets = new Insets(30, 50, 30, 50);
+            contentPanel.add(title, gbc);
+
+            JLabel storeLabel = new JLabel("Sélectionner un magasin:");
+            gbc.gridy = 1;
+            contentPanel.add(storeLabel, gbc);
+
+            JComboBox<String> storeComboBox = new JComboBox<>();
+            gbc.gridy = 2;
+            contentPanel.add(storeComboBox, gbc);
+
+            JButton showButton = new JButton("Afficher");
+            gbc.gridy = 7;
+            gbc.insets = new Insets(-30, 750, 30, 750);
+            contentPanel.add(showButton, gbc);
+
+            loadStore(storeComboBox);
+
+            mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+            frame.add(mainPanel);
+            frame.setVisible(true);
+
+            showButton.addActionListener(e -> {
+                storeList(storeComboBox.getSelectedItem().toString(), frame);
+            });
 
             mainPanel.add(navBar, BorderLayout.NORTH);
             frame.setVisible(true);
@@ -134,12 +187,65 @@ public class Inventory {
         return null;
     }
 
-    private ResultSet getItemsForStore(Connection connection, String storeId) throws SQLException {
-        String query = "SELECT items.name, items.price, items.quantity FROM items " +
-                "JOIN inventory ON inventory.item_id = items.id " +
-                "WHERE inventory.store_id = ?";
-        PreparedStatement stmt = connection.prepareStatement(query);
-        stmt.setString(1, storeId);
-        return stmt.executeQuery();
+    private void loadStore(JComboBox<String> storeComboBox) {
+        try (Connection connection = DriverManager.getConnection(
+                dbProperties.getProperty("db.url"),
+                dbProperties.getProperty("db.username"),
+                dbProperties.getProperty("db.password"))) {
+
+            String query = "SELECT name_store FROM store " +
+                    "JOIN store_employees ON store.id = store_employees.store_id " +
+                    "WHERE store_employees.user_id = ?";
+
+            try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                String userId = SessionManager.getCurrentUserId();
+                stmt.setString(1, userId);
+                ResultSet rs = stmt.executeQuery();
+
+                while (rs.next()) {
+                    storeComboBox.addItem(rs.getString("name_store"));
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
+        private ResultSet getItemsForStore(Connection connection, String storeId) throws SQLException {
+            String query = "SELECT items.name, inventory.item_id, inventory.store_id, inventory.price, inventory.quantity FROM inventory " +
+                    "JOIN items ON inventory.item_id = items.id " +
+                    "WHERE inventory.store_id = ?";
+            PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, storeId);
+            return stmt.executeQuery();
+        }
+
+    private void storeList(String email, JFrame frame) {
+        try (Connection connection = DriverManager.getConnection(
+                dbProperties.getProperty("db.url"),
+                dbProperties.getProperty("db.username"),
+                dbProperties.getProperty("db.password"))) {
+
+            setStore(connection, email);
+            JOptionPane.showMessageDialog(null, "Email supprimé avec succès de la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            frame.dispose();
+            new WhiteList().afficherWhiteList();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void setStore(Connection connection, String email) throws SQLException {
+        String query = "SELECT * FROM white_list WHERE email = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, email);
+            stmt.executeUpdate();
+        }
     }
 }
+
+

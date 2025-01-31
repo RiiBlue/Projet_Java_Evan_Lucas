@@ -123,7 +123,7 @@ public class WhiteList {
         });
     }
 
-    private void loadEmployee(JComboBox<String> storeComboBox) {
+    private void loadEmployee(JComboBox<String> employeeComboBox) {
         try (Connection connection = DriverManager.getConnection(
                 dbProperties.getProperty("db.url"),
                 dbProperties.getProperty("db.username"),
@@ -134,7 +134,7 @@ public class WhiteList {
             ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next()) {
-                storeComboBox.addItem(rs.getString("email"));
+                employeeComboBox.addItem(rs.getString("email"));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
