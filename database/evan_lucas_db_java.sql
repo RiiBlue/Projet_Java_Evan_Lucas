@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : mer. 29 jan. 2025 à 18:49
+-- Généré le : ven. 31 jan. 2025 à 08:08
 -- Version du serveur : 8.2.0
 -- Version de PHP : 8.2.13
 
@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `id` int NOT NULL AUTO_INCREMENT,
   `item_id` int NOT NULL,
   `store_id` int NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_item_id` (`item_id`),
   KEY `fk_store_id` (`store_id`)
@@ -41,9 +43,9 @@ CREATE TABLE IF NOT EXISTS `inventory` (
 -- Déchargement des données de la table `inventory`
 --
 
-INSERT INTO `inventory` (`id`, `item_id`, `store_id`) VALUES
-(1, 1, 2),
-(2, 2, 1);
+INSERT INTO `inventory` (`id`, `item_id`, `store_id`, `price`, `quantity`) VALUES
+(1, 1, 2, 0.00, 0),
+(2, 2, 1, 0.00, 0);
 
 -- --------------------------------------------------------
 
@@ -55,8 +57,6 @@ DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `quantity` int NOT NULL,
-  `price` double NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -64,9 +64,9 @@ CREATE TABLE IF NOT EXISTS `items` (
 -- Déchargement des données de la table `items`
 --
 
-INSERT INTO `items` (`id`, `name`, `quantity`, `price`) VALUES
-(1, 'Pomme', 92, 7),
-(2, 'Poire', 999, 0.01);
+INSERT INTO `items` (`id`, `name`) VALUES
+(1, 'Pomme'),
+(2, 'Poire');
 
 -- --------------------------------------------------------
 
