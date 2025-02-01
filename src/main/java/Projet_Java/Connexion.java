@@ -41,7 +41,7 @@ public class Connexion {
         JPanel mainPanel = new JPanel(new BorderLayout());
 
         JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(242, 242, 242));
+        contentPanel.setBackground(new Color(219, 219, 218));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 50, 5, 50);

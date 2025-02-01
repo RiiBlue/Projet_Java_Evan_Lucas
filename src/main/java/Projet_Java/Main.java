@@ -31,6 +31,7 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.getContentPane().setBackground(new Color(255, 0, 0));
 
         // Récupérer les informations de l'utilisateur
         loadUserInfo(email);
@@ -148,12 +149,25 @@ public class Main {
         dashboard.setPreferredSize(new Dimension(250, frame.getHeight()));
         dashboard.setBackground(new Color(44, 62, 80));
 
+        // Panel pour le titre
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));  // Disposition horizontale pour centrer le titre
+        titlePanel.setBackground(new Color(44, 62, 80));  // Couleur de fond
+
         JLabel titleLabel = new JLabel("Profil Utilisateur");
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        dashboard.add(Box.createVerticalStrut(20));
-        dashboard.add(titleLabel);
+
+        dashboard.add(Box.createVerticalStrut(20));  // Espacement avant le titre
+        titlePanel.add(Box.createHorizontalGlue());  // Pour centrer le titre horizontalement
+        titlePanel.add(titleLabel);
+        titlePanel.add(Box.createHorizontalGlue());  // Pour centrer le titre horizontalement
+
+        // Panel pour les informations de l'utilisateur
+        JPanel userInfoPanel = new JPanel();
+        userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));  // Disposition verticale pour les infos utilisateur
+        userInfoPanel.setBackground(new Color(44, 62, 80));  // Couleur de fond
 
         JLabel userLabel = new JLabel("Pseudo : " + pseudo);
         JLabel emailLabel = new JLabel("Email : " + email);
@@ -165,11 +179,25 @@ public class Main {
         roleLabel.setForeground(Color.WHITE);
         storeLabel.setForeground(Color.WHITE);
 
-        dashboard.add(Box.createVerticalStrut(10));
-        dashboard.add(userLabel);
-        dashboard.add(emailLabel);
-        dashboard.add(roleLabel);
-        dashboard.add(storeLabel);
+        userLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        roleLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        storeLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+
+        userLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        emailLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        roleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        storeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        userInfoPanel.add(userLabel);
+        userInfoPanel.add(emailLabel);
+        userInfoPanel.add(roleLabel);
+        userInfoPanel.add(storeLabel);
+
+        // Panel pour les boutons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));  // Disposition verticale pour les boutons
+        buttonPanel.setBackground(new Color(44, 62, 80));  // Couleur de fond
 
         JButton changeNameButton = new JButton("Changer de pseudo");
         JButton changePasswordButton = new JButton("Changer de mot de passe");
@@ -180,11 +208,18 @@ public class Main {
         changeNameButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Fonctionnalité à implémenter."));
         changePasswordButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Fonctionnalité à implémenter."));
 
-        dashboard.add(Box.createVerticalStrut(20));
-        dashboard.add(changeNameButton);
-        dashboard.add(Box.createVerticalStrut(10));
-        dashboard.add(changePasswordButton);
+        buttonPanel.add(changeNameButton);
+        buttonPanel.add(Box.createVerticalStrut(10));  // Espacement entre les boutons
+        buttonPanel.add(changePasswordButton);
+
+        // Ajouter chaque panel au dashboard
+        dashboard.add(titlePanel);  // Ajouter le panel du titre
+        dashboard.add(Box.createVerticalStrut(20));  // Espacement après le titre
+        dashboard.add(userInfoPanel);  // Ajouter le panel des infos utilisateur
+        dashboard.add(Box.createVerticalStrut(20));  // Espacement après les infos utilisateur
+        dashboard.add(buttonPanel);  // Ajouter le panel des boutons
 
         return dashboard;
     }
+
 }
