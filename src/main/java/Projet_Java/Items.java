@@ -21,6 +21,76 @@ public class Items {
         }
     }
 
+    private JPanel createNavBar(JFrame frame) {
+        JPanel navBar = new JPanel();
+        navBar.setBackground(new Color(33, 37, 41));
+        navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+        String role = SessionManager.getCurrentUserRole(); // Assurer que tu as une méthode qui récupère le rôle
+
+        if ("administrateur".equals(role)) {
+            JButton whiteListButton = new JButton("Liste blanche");
+            whiteListButton.setBackground(new Color(0, 123, 255));
+            whiteListButton.setForeground(new Color(0, 123, 255));
+            whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            whiteListButton.addActionListener(e -> {
+                frame.dispose();
+                new WhiteList().afficherWhiteList();
+            });
+            navBar.add(whiteListButton);
+
+            JButton manageEmployeeButton = new JButton("Gérer Employés");
+            manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
+            manageEmployeeButton.setForeground(new Color(40, 167, 69));
+            manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            manageEmployeeButton.addActionListener(e -> {
+                frame.dispose();
+                new ManageEmployee().afficherManageEmployee();
+            });
+            navBar.add(manageEmployeeButton);
+        }
+
+        JButton productButton = new JButton("Produits");
+        productButton.setBackground(new Color(253, 189, 1));
+        productButton.setForeground(new Color(253, 189, 1));
+        productButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        productButton.addActionListener(e -> {
+            frame.dispose();
+            new Items().afficherItem();
+        });
+        navBar.add(productButton);
+
+        JButton inventoryButton = new JButton("Inventaire");
+        inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
+        inventoryButton.setForeground(new Color(220, 53, 69));
+        inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        inventoryButton.addActionListener(e -> {
+            if (SessionManager.isLoggedIn()) {
+                frame.dispose();
+                new Inventory().afficherInventory();
+            } else {
+                JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
+                new Connexion().afficherConnexion();
+            }
+        });
+        navBar.add(inventoryButton);
+
+        JButton logoutButton = new JButton("Déconnexion");
+        logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
+        logoutButton.setForeground(new Color(220, 53, 69));
+        logoutButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        logoutButton.addActionListener(e -> {
+            SessionManager.endSession();
+            frame.dispose();
+            new Connexion().afficherConnexion();
+        });
+
+        if (SessionManager.isLoggedIn()) {
+            navBar.add(logoutButton);
+        }
+        return navBar;
+    }
+
     public void afficherItem() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -34,23 +104,7 @@ public class Items {
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        JPanel navBar = new JPanel();
-        navBar.setBackground(new Color(33, 37, 41)); // Couleur sombre pour la navbar
-        navBar.setLayout(new FlowLayout(FlowLayout.LEFT)); // Aligner à gauche
-        JButton homeButton = new JButton("Accueil");
-        homeButton.setBackground(new Color(0, 123, 255)); // Bleu
-        homeButton.setForeground(new Color(0, 123, 255));
-        homeButton.setForeground(Color.WHITE);
-        homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        homeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                new Main().createMainFrame(SessionManager.getCurrentUserEmail());
-            }
-        });
-        navBar.add(homeButton);
+        JPanel navBar = createNavBar(frame);
         mainPanel.add(navBar, BorderLayout.NORTH);
 
         JPanel contentPanel = new JPanel(new GridBagLayout());
@@ -92,7 +146,7 @@ public class Items {
         contentPanel.add(priceField, gbc);
 
         JLabel quantityLabel = new JLabel("Quantité :", SwingConstants.LEFT);
-        nameLabel.setFont(new Font("Arial", Font.PLAIN, 25));
+        quantityLabel.setFont(new Font("Arial", Font.PLAIN, 25));
         gbc.gridy = 5;
         gbc.gridwidth = 5;
         gbc.insets = new Insets(10, 150, 5, 150);
@@ -199,4 +253,3 @@ public class Items {
         }
     }
 }
-

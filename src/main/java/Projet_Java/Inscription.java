@@ -37,26 +37,6 @@ public class Inscription {
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        JPanel navBar = new JPanel();
-        navBar.setBackground(new Color(33, 37, 41)); // Couleur sombre pour la navbar
-        navBar.setLayout(new FlowLayout(FlowLayout.LEFT)); // Aligner à droite
-        JButton homeButton = new JButton("Accueil");
-        homeButton.setBackground(new Color(0, 123, 255)); // Bleu
-        homeButton.setForeground(Color.WHITE);
-        homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        homeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                String email = "";
-                new Main().createMainFrame(email);
-            }
-        });
-        navBar.add(homeButton);
-        mainPanel.add(navBar, BorderLayout.NORTH);
-
-
         JPanel contentPanel = new JPanel(new GridBagLayout());
         contentPanel.setBackground(new Color(242, 242, 242));
         GridBagConstraints gbc = new GridBagConstraints();

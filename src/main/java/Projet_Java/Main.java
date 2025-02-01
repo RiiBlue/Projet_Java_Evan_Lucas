@@ -14,6 +14,7 @@ public class Main {
 
     private JFrame frame;
     private Properties dbProperties;
+    private String pseudo, email, role, store;
 
     public Main() {
         dbProperties = new Properties();
@@ -26,31 +27,39 @@ public class Main {
 
     public void createMainFrame(String email) {
         frame = new JFrame("Accueil");
-        frame.setSize(800, 600);
+        frame.setSize(1000, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
+        // Récupérer les informations de l'utilisateur
+        loadUserInfo(email);
+
         JPanel mainPanel = new JPanel(new BorderLayout());
         frame.add(mainPanel);
 
+        JPanel navBar = createNavBar();
+        mainPanel.add(navBar, BorderLayout.NORTH);
+
+        JPanel dashboard = createDashboardPanel();
+        mainPanel.add(dashboard, BorderLayout.WEST);
+
+        frame.setVisible(true);
+    }
+
+    private JPanel createNavBar() {
         JPanel navBar = new JPanel();
         navBar.setBackground(new Color(33, 37, 41));
         navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
-
-        String role = getUserRole(email);
 
         if ("administrateur".equals(role)) {
             JButton whiteListButton = new JButton("Liste blanche");
             whiteListButton.setBackground(new Color(0, 123, 255));
             whiteListButton.setForeground(new Color(0, 123, 255));
             whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
-            whiteListButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    frame.dispose();
-                    new WhiteList().afficherWhiteList();
-                }
+            whiteListButton.addActionListener(e -> {
+                frame.dispose();
+                new WhiteList().afficherWhiteList();
             });
             navBar.add(whiteListButton);
 
@@ -58,12 +67,9 @@ public class Main {
             manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
             manageEmployeeButton.setForeground(new Color(40, 167, 69));
             manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
-            manageEmployeeButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    frame.dispose();
-                    new ManageEmployee().afficherManageEmployee(); // Appel à la méthode pour afficher la page ManageEmployee
-                }
+            manageEmployeeButton.addActionListener(e -> {
+                frame.dispose();
+                new ManageEmployee().afficherManageEmployee();
             });
             navBar.add(manageEmployeeButton);
         }
@@ -72,12 +78,9 @@ public class Main {
         productButton.setBackground(new Color(253, 189, 1));
         productButton.setForeground(new Color(253, 189, 1));
         productButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        productButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                new Items().afficherItem();
-            }
+        productButton.addActionListener(e -> {
+            frame.dispose();
+            new Items().afficherItem();
         });
         navBar.add(productButton);
 
@@ -85,65 +88,103 @@ public class Main {
         inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
         inventoryButton.setForeground(new Color(220, 53, 69));
         inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        inventoryButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (SessionManager.isLoggedIn()) {
-                    frame.dispose();
-                    new Inventory().afficherInventory();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
-                    new Connexion().afficherConnexion();
-                }
+        inventoryButton.addActionListener(e -> {
+            if (SessionManager.isLoggedIn()) {
+                frame.dispose();
+                new Inventory().afficherInventory();
+            } else {
+                JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
+                new Connexion().afficherConnexion();
             }
         });
         navBar.add(inventoryButton);
-
 
         JButton logoutButton = new JButton("Déconnexion");
         logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
         logoutButton.setForeground(new Color(220, 53, 69));
         logoutButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        logoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SessionManager.endSession();
-                frame.dispose();
-                new Connexion().afficherConnexion();
-            }
+        logoutButton.addActionListener(e -> {
+            SessionManager.endSession();
+            frame.dispose();
+            new Connexion().afficherConnexion();
         });
 
         if (SessionManager.isLoggedIn()) {
             navBar.add(logoutButton);
-            JLabel userLabel = new JLabel("Connecté en tant que : " + SessionManager.getCurrentUserPseudo() + SessionManager.getCurrentUserId());
-            userLabel.setForeground(Color.WHITE);
-            userLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-            navBar.add(userLabel);
         }
-
-        mainPanel.add(navBar, BorderLayout.NORTH);
-        frame.setVisible(true);
-
+        return navBar;
     }
 
-    private String getUserRole(String email) {
+    private void loadUserInfo(String userEmail) {
         try (Connection connection = DriverManager.getConnection(
                 dbProperties.getProperty("db.url"),
                 dbProperties.getProperty("db.username"),
                 dbProperties.getProperty("db.password"))) {
 
-            String query = "SELECT rôle FROM users WHERE email = ?";
+            String query = "SELECT u.pseudo, u.email, u.rôle, s.name_store FROM users u " +
+                    "LEFT JOIN store_employees se ON u.id = se.user_id " +
+                    "LEFT JOIN store s ON se.store_id = s.id " +
+                    "WHERE u.email = ?";
+
             try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                stmt.setString(1, email);
+                stmt.setString(1, userEmail);
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getString("rôle");
+                        pseudo = rs.getString("pseudo");
+                        email = rs.getString("email");
+                        role = rs.getString("rôle");
+                        store = rs.getString("name_store") != null ? rs.getString("name_store") : "Non assigné";
                     }
                 }
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erreur lors de la vérification du rôle de l'utilisateur.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Erreur lors de la récupération des informations utilisateur.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-        return null;
+    }
+
+    private JPanel createDashboardPanel() {
+        JPanel dashboard = new JPanel();
+        dashboard.setLayout(new BoxLayout(dashboard, BoxLayout.Y_AXIS));
+        dashboard.setPreferredSize(new Dimension(250, frame.getHeight()));
+        dashboard.setBackground(new Color(44, 62, 80));
+
+        JLabel titleLabel = new JLabel("Profil Utilisateur");
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        dashboard.add(Box.createVerticalStrut(20));
+        dashboard.add(titleLabel);
+
+        JLabel userLabel = new JLabel("Pseudo : " + pseudo);
+        JLabel emailLabel = new JLabel("Email : " + email);
+        JLabel roleLabel = new JLabel("Rôle : " + role);
+        JLabel storeLabel = new JLabel("Magasin : " + store);
+
+        userLabel.setForeground(Color.WHITE);
+        emailLabel.setForeground(Color.WHITE);
+        roleLabel.setForeground(Color.WHITE);
+        storeLabel.setForeground(Color.WHITE);
+
+        dashboard.add(Box.createVerticalStrut(10));
+        dashboard.add(userLabel);
+        dashboard.add(emailLabel);
+        dashboard.add(roleLabel);
+        dashboard.add(storeLabel);
+
+        JButton changeNameButton = new JButton("Changer de pseudo");
+        JButton changePasswordButton = new JButton("Changer de mot de passe");
+
+        changeNameButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        changePasswordButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        changeNameButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Fonctionnalité à implémenter."));
+        changePasswordButton.addActionListener(e -> JOptionPane.showMessageDialog(null, "Fonctionnalité à implémenter."));
+
+        dashboard.add(Box.createVerticalStrut(20));
+        dashboard.add(changeNameButton);
+        dashboard.add(Box.createVerticalStrut(10));
+        dashboard.add(changePasswordButton);
+
+        return dashboard;
     }
 }

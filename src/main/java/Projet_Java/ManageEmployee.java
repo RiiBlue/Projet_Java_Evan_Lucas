@@ -21,6 +21,75 @@ public class ManageEmployee {
             JOptionPane.showMessageDialog(null, "Erreur de chargement des propriétés de la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
+    private JPanel createNavBar(JFrame frame) {
+        JPanel navBar = new JPanel();
+        navBar.setBackground(new Color(33, 37, 41));
+        navBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
+
+        String role = SessionManager.getCurrentUserRole();
+
+        if ("administrateur".equals(role)) {
+            JButton whiteListButton = new JButton("Liste blanche");
+            whiteListButton.setBackground(new Color(0, 123, 255));
+            whiteListButton.setForeground(new Color(0, 123, 255));
+            whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            whiteListButton.addActionListener(e -> {
+                frame.dispose();
+                new WhiteList().afficherWhiteList();
+            });
+            navBar.add(whiteListButton);
+
+            JButton manageEmployeeButton = new JButton("Gérer Employés");
+            manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
+            manageEmployeeButton.setForeground(new Color(40, 167, 69));
+            manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            manageEmployeeButton.addActionListener(e -> {
+                frame.dispose();
+                new ManageEmployee().afficherManageEmployee();
+            });
+            navBar.add(manageEmployeeButton);
+        }
+
+        JButton productButton = new JButton("Produits");
+        productButton.setBackground(new Color(253, 189, 1));
+        productButton.setForeground(new Color(253, 189, 1));
+        productButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        productButton.addActionListener(e -> {
+            frame.dispose();
+            new Items().afficherItem();
+        });
+        navBar.add(productButton);
+
+        JButton inventoryButton = new JButton("Inventaire");
+        inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
+        inventoryButton.setForeground(new Color(220, 53, 69));
+        inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        inventoryButton.addActionListener(e -> {
+            if (SessionManager.isLoggedIn()) {
+                frame.dispose();
+                new Inventory().afficherInventory();
+            } else {
+                JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
+                new Connexion().afficherConnexion();
+            }
+        });
+        navBar.add(inventoryButton);
+
+        JButton logoutButton = new JButton("Déconnexion");
+        logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
+        logoutButton.setForeground(new Color(220, 53, 69));
+        logoutButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        logoutButton.addActionListener(e -> {
+            SessionManager.endSession();
+            frame.dispose();
+            new Connexion().afficherConnexion();
+        });
+
+        if (SessionManager.isLoggedIn()) {
+            navBar.add(logoutButton);
+        }
+        return navBar;
+    }
 
     public void afficherManageEmployee() {
         try {
@@ -39,23 +108,11 @@ public class ManageEmployee {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
+        // Création du panneau principal
         JPanel mainPanel = new JPanel(new BorderLayout());
-        JPanel navBar = new JPanel();
-        navBar.setBackground(new Color(33, 37, 41));
-        navBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JButton homeButton = new JButton("Gestion d'employés");
-        homeButton.setBackground(new Color(0, 123, 255));
-        homeButton.setForeground(Color.WHITE);
-        homeButton.setFont(new Font("Arial", Font.PLAIN, 14));
 
-        homeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                new Main().createMainFrame(SessionManager.getCurrentUserEmail());
-            }
-        });
-        navBar.add(homeButton);
+        // Ajout de la barre de navigation
+        JPanel navBar = createNavBar(frame);
         mainPanel.add(navBar, BorderLayout.NORTH);
 
         JPanel contentPanel = new JPanel(new GridBagLayout());
@@ -227,7 +284,7 @@ public class ManageEmployee {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-        return -1;
+        return -1; // Retourner -1 si l'employé n'est pas trouvé
     }
 
     private void updateEmployeeStore(int employeeId, int storeId) {
@@ -241,11 +298,9 @@ public class ManageEmployee {
             pstmt.setInt(1, employeeId);
             pstmt.setInt(2, storeId);
             pstmt.executeUpdate();
-
-            JOptionPane.showMessageDialog(null, "Employé ajouté au magasin avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erreur lors de l'ajout de l'employé au magasin.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Erreur de mise à jour dans la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
