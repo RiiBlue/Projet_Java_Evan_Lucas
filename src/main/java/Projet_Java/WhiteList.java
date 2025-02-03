@@ -30,6 +30,17 @@ public class WhiteList {
         String role = SessionManager.getCurrentUserRole(); // Assurer que tu as une méthode qui récupère le rôle
 
         if ("administrateur".equals(role)) {
+            // Si c'est l'admin, on affiche le bouton Choix Magasin
+            JButton choiceStoreButton = new JButton("Choix Magasin");
+            choiceStoreButton.setBackground(new Color(0, 123, 255));
+            choiceStoreButton.setForeground(new Color(0, 123, 255));
+            choiceStoreButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            choiceStoreButton.addActionListener(e -> {
+                frame.dispose();
+                new ChoixMagasin().afficherChoixMagasin();
+            });
+            navBar.add(choiceStoreButton);
+
             JButton whiteListButton = new JButton("Liste blanche");
             whiteListButton.setBackground(new Color(0, 123, 255));
             whiteListButton.setForeground(new Color(0, 123, 255));
@@ -49,32 +60,22 @@ public class WhiteList {
                 new ManageEmployee().afficherManageEmployee();
             });
             navBar.add(manageEmployeeButton);
+        } else {
+            JButton inventoryButton = new JButton("Inventaire");
+            inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
+            inventoryButton.setForeground(new Color(220, 53, 69));
+            inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            inventoryButton.addActionListener(e -> {
+                if (SessionManager.isLoggedIn()) {
+                    frame.dispose();
+                    new Inventory().afficherInventory();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
+                    new Connexion().afficherConnexion();
+                }
+            });
+            navBar.add(inventoryButton);
         }
-
-        JButton productButton = new JButton("Produits");
-        productButton.setBackground(new Color(253, 189, 1));
-        productButton.setForeground(new Color(253, 189, 1));
-        productButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        productButton.addActionListener(e -> {
-            frame.dispose();
-            new Items().afficherItem();
-        });
-        navBar.add(productButton);
-
-        JButton inventoryButton = new JButton("Inventaire");
-        inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
-        inventoryButton.setForeground(new Color(220, 53, 69));
-        inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        inventoryButton.addActionListener(e -> {
-            if (SessionManager.isLoggedIn()) {
-                frame.dispose();
-                new Inventory().afficherInventory();
-            } else {
-                JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
-                new Connexion().afficherConnexion();
-            }
-        });
-        navBar.add(inventoryButton);
 
         JButton logoutButton = new JButton("Déconnexion");
         logoutButton.setBackground(new Color(220, 53, 69)); // Rouge

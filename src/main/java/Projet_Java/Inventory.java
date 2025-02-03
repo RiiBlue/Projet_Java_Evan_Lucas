@@ -29,6 +29,17 @@ public class Inventory {
         String role = SessionManager.getCurrentUserRole(); // Assurer que tu as une méthode qui récupère le rôle
 
         if ("administrateur".equals(role)) {
+            // Si c'est l'admin, on affiche le bouton Choix Magasin
+            JButton choiceStoreButton = new JButton("Choix Magasin");
+            choiceStoreButton.setBackground(new Color(0, 123, 255));
+            choiceStoreButton.setForeground(new Color(0, 123, 255));
+            choiceStoreButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            choiceStoreButton.addActionListener(e -> {
+                frame.dispose();
+                new ChoixMagasin().afficherChoixMagasin();
+            });
+            navBar.add(choiceStoreButton);
+
             JButton whiteListButton = new JButton("Liste blanche");
             whiteListButton.setBackground(new Color(0, 123, 255));
             whiteListButton.setForeground(new Color(0, 123, 255));
@@ -48,32 +59,22 @@ public class Inventory {
                 new ManageEmployee().afficherManageEmployee();
             });
             navBar.add(manageEmployeeButton);
+        } else {
+            JButton inventoryButton = new JButton("Inventaire");
+            inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
+            inventoryButton.setForeground(new Color(220, 53, 69));
+            inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
+            inventoryButton.addActionListener(e -> {
+                if (SessionManager.isLoggedIn()) {
+                    frame.dispose();
+                    new Inventory().afficherInventory();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
+                    new Connexion().afficherConnexion();
+                }
+            });
+            navBar.add(inventoryButton);
         }
-
-        JButton productButton = new JButton("Produits");
-        productButton.setBackground(new Color(253, 189, 1));
-        productButton.setForeground(new Color(253, 189, 1));
-        productButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        productButton.addActionListener(e -> {
-            frame.dispose();
-            new Items().afficherItem();
-        });
-        navBar.add(productButton);
-
-        JButton inventoryButton = new JButton("Inventaire");
-        inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
-        inventoryButton.setForeground(new Color(220, 53, 69));
-        inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        inventoryButton.addActionListener(e -> {
-            if (SessionManager.isLoggedIn()) {
-                frame.dispose();
-                new Inventory().afficherInventory();
-            } else {
-                JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
-                new Connexion().afficherConnexion();
-            }
-        });
-        navBar.add(inventoryButton);
 
         JButton logoutButton = new JButton("Déconnexion");
         logoutButton.setBackground(new Color(220, 53, 69)); // Rouge
@@ -105,7 +106,6 @@ public class Inventory {
 
         String userId = SessionManager.getCurrentUserId();
 
-        // Déclaration de la connexion en dehors du try
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(
@@ -128,50 +128,18 @@ public class Inventory {
             JPanel mainPanel = new JPanel(new BorderLayout());
             frame.add(mainPanel);
 
-
-            JPanel contentPanel = new JPanel(new GridBagLayout());
+            JPanel contentPanel = new JPanel(new BorderLayout());
             contentPanel.setBackground(new Color(242, 242, 242));
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            gbc.insets = new Insets(5, 50, 5, 50);
-            gbc.weightx = 1;
-
-            JLabel title = new JLabel("Magasins", SwingConstants.CENTER);
+            JLabel title = new JLabel("Inventaire", SwingConstants.CENTER);
             title.setFont(new Font("Arial", Font.BOLD, 24));
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.gridwidth = 2;
-            gbc.insets = new Insets(30, 50, 30, 50);
-            contentPanel.add(title, gbc);
+            contentPanel.add(title, BorderLayout.NORTH);
 
-            JLabel storeLabel = new JLabel("Sélectionner un magasin:");
-            gbc.gridy = 1;
-            contentPanel.add(storeLabel, gbc);
-
-            JComboBox<String> storeComboBox = new JComboBox<>();
-            gbc.gridy = 2;
-            contentPanel.add(storeComboBox, gbc);
-
-            JButton showButton = new JButton("Afficher");
-            gbc.gridy = 7;
-            gbc.insets = new Insets(-30, 750, 30, 750);
-            contentPanel.add(showButton, gbc);
-
-            loadStore(storeComboBox);
-
-            mainPanel.add(contentPanel, BorderLayout.CENTER);
-
-            frame.add(mainPanel);
-            frame.setVisible(true);
-
-            showButton.addActionListener(e -> {
-                storeList(storeComboBox.getSelectedItem().toString(), frame);
-            });
-
+            mainPanel.add(contentPanel, BorderLayout.NORTH);
             mainPanel.add(createNavBar(frame), BorderLayout.NORTH);
-            frame.setVisible(true);
 
-            mainPanel.add(createNavBar(frame), BorderLayout.NORTH);
+            JPanel spacePanel = new JPanel();
+            spacePanel.setPreferredSize(new Dimension(0, 20)); // Crée un espace de 20px
+            mainPanel.add(spacePanel, BorderLayout.CENTER);
 
             String[] columns = {"Nom", "Quantité", "Prix"};
             DefaultTableModel tableModel = new DefaultTableModel(columns, 0);
@@ -185,6 +153,29 @@ public class Inventory {
                 double price = items.getDouble("price");
                 tableModel.addRow(new Object[]{name, quantity, price});
             }
+
+            JPanel buttonsPanel = new JPanel();
+            buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+            JButton addButton = new JButton("Ajouter un Item");
+            addButton.setFont(new Font("Arial", Font.PLAIN, 16));
+            addButton.setPreferredSize(new Dimension(200, 50));
+            Connection finalConnection = connection;
+            addButton.addActionListener(e -> showAddItemDialog(frame, finalConnection, storeId));
+            buttonsPanel.add(addButton);
+
+            JButton deleteButton = new JButton("Supprimer un Item");
+            deleteButton.setFont(new Font("Arial", Font.PLAIN, 16));
+            deleteButton.setPreferredSize(new Dimension(200, 50));
+            deleteButton.addActionListener(e -> showDeleteItemDialog(frame, finalConnection, storeId));
+            buttonsPanel.add(deleteButton);
+
+            JButton updateButton = new JButton("Mettre à jour un Item");
+            updateButton.setFont(new Font("Arial", Font.PLAIN, 16));
+            updateButton.setPreferredSize(new Dimension(200, 50));
+            updateButton.addActionListener(e -> showUpdateItemDialog(frame, finalConnection, storeId));
+            buttonsPanel.add(updateButton);
+
+            mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
             frame.setVisible(true);
 
@@ -206,65 +197,171 @@ public class Inventory {
         return null;
     }
 
-    private void loadStore(JComboBox<String> storeComboBox) {
-        try (Connection connection = DriverManager.getConnection(
-                dbProperties.getProperty("db.url"),
-                dbProperties.getProperty("db.username"),
-                dbProperties.getProperty("db.password"))) {
+    private ResultSet getItemsForStore(Connection connection, String storeId) throws SQLException {
+        String query = "SELECT items.name, inventory.item_id, inventory.store_id, inventory.price, inventory.quantity FROM inventory " +
+                "JOIN items ON inventory.item_id = items.id " +
+                "WHERE inventory.store_id = ?";
+        PreparedStatement stmt = connection.prepareStatement(query);
+        stmt.setString(1, storeId);
+        return stmt.executeQuery();
+    }
 
-            String query = "SELECT name_store FROM store " +
-                    "JOIN store_employees ON store.id = store_employees.store_id " +
-                    "WHERE store_employees.user_id = ?";
+    private void showAddItemDialog(JFrame frame, Connection connection, String storeId) {
+        JTextField nameField = new JTextField(20);
+        JTextField quantityField = new JTextField(20);
+        JTextField priceField = new JTextField(20);
 
-            try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                String userId = SessionManager.getCurrentUserId();
-                stmt.setString(1, userId);
-                ResultSet rs = stmt.executeQuery();
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Nom de l'item :"));
+        panel.add(nameField);
+        panel.add(new JLabel("Quantité :"));
+        panel.add(quantityField);
+        panel.add(new JLabel("Prix :"));
+        panel.add(priceField);
 
-                while (rs.next()) {
-                    storeComboBox.addItem(rs.getString("name_store"));
-                }
+        int option = JOptionPane.showConfirmDialog(frame, panel, "Ajouter un Item", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            String name = nameField.getText().trim();
+            String quantityStr = quantityField.getText();
+            String priceStr = priceField.getText();
+
+            if (name.isEmpty() || quantityStr.isEmpty() || priceStr.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Tous les champs doivent être remplis", "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+
+            // Normalisation du nom (ignorer les différences de casse)
+            name = name.trim().toLowerCase();
+
+            try {
+                int quantity = Integer.parseInt(quantityStr);
+                double price = Double.parseDouble(priceStr);
+
+                String query = "INSERT INTO inventory (store_id, item_id, price, quantity) VALUES (?, ?, ?, ?)";
+                try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                    stmt.setString(1, storeId);
+                    stmt.setString(2, name); // Ajout du nom de l'item
+                    stmt.setDouble(3, price);
+                    stmt.setInt(4, quantity);
+                    stmt.executeUpdate();
+                    JOptionPane.showMessageDialog(frame, "Item ajouté avec succès.");
+                    frame.dispose();
+                    afficherInventory();
+                }
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(frame, "Quantité et prix doivent être des nombres valides.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(frame, "Erreur lors de l'ajout de l'item.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
     }
+    private void showDeleteItemDialog(JFrame frame, Connection connection, String storeId) {
+        JTextField nameField = new JTextField(20);
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Nom de l'item à supprimer :"));
+        panel.add(nameField);
 
+        int option = JOptionPane.showConfirmDialog(frame, panel, "Supprimer un Item", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            String name = nameField.getText().trim();
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Veuillez entrer un nom d'item.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        private ResultSet getItemsForStore(Connection connection, String storeId) throws SQLException {
-            String query = "SELECT items.name, inventory.item_id, inventory.store_id, inventory.price, inventory.quantity FROM inventory " +
-                    "JOIN items ON inventory.item_id = items.id " +
-                    "WHERE inventory.store_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setString(1, storeId);
-            return stmt.executeQuery();
-        }
+            // Normalisation du nom
+            name = name.toLowerCase();
 
-    private void storeList(String email, JFrame frame) {
-        try (Connection connection = DriverManager.getConnection(
-                dbProperties.getProperty("db.url"),
-                dbProperties.getProperty("db.username"),
-                dbProperties.getProperty("db.password"))) {
+            try {
+                String deleteInventoryQuery = "DELETE FROM inventory WHERE store_id = ? AND item_id = (SELECT id FROM items WHERE LOWER(name) = ?)";
+                try (PreparedStatement stmt = connection.prepareStatement(deleteInventoryQuery)) {
+                    stmt.setString(1, storeId);
+                    stmt.setString(2, name);
+                    int rowsAffectedInventory = stmt.executeUpdate();
 
-            setStore(connection, email);
-            JOptionPane.showMessageDialog(null, "Email supprimé avec succès de la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-            frame.dispose();
-            new WhiteList().afficherWhiteList();
+                    if (rowsAffectedInventory > 0) {
+                        String deleteItemQuery = "DELETE FROM items WHERE LOWER(name) = ?";
+                        try (PreparedStatement stmt2 = connection.prepareStatement(deleteItemQuery)) {
+                            stmt2.setString(1, name);
+                            int rowsAffectedItem = stmt2.executeUpdate();
 
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erreur de connexion à la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                            if (rowsAffectedItem > 0) {
+                                JOptionPane.showMessageDialog(frame, "Item supprimé avec succès.");
+                                frame.dispose();
+                                afficherInventory();
+                            } else {
+                                JOptionPane.showMessageDialog(frame, "Item introuvable dans la table items.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Item introuvable dans l'inventaire.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(frame, "Erreur lors de la suppression de l'item.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
     }
+    private void showUpdateItemDialog(JFrame frame, Connection connection, String storeId) {
+        JTextField nameField = new JTextField(20);
+        JTextField quantityField = new JTextField(20);
+        JTextField priceField = new JTextField(20);
 
-    private void setStore(Connection connection, String email) throws SQLException {
-        String query = "SELECT * FROM white_list WHERE email = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, email);
-            stmt.executeUpdate();
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Nom de l'item :"));
+        panel.add(nameField);
+        panel.add(new JLabel("Nouvelle Quantité :"));
+        panel.add(quantityField);
+        panel.add(new JLabel("Nouveau Prix :"));
+        panel.add(priceField);
+
+        int option = JOptionPane.showConfirmDialog(frame, panel, "Mettre à jour un Item", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            String name = nameField.getText().trim();
+            String quantityStr = quantityField.getText();
+            String priceStr = priceField.getText();
+
+            if (name.isEmpty() || quantityStr.isEmpty() || priceStr.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Tous les champs doivent être remplis", "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                int quantity = Integer.parseInt(quantityStr);
+                double price = Double.parseDouble(priceStr);
+
+                String checkItemQuery = "SELECT * FROM inventory WHERE store_id = ? AND item_id = (SELECT id FROM items WHERE LOWER(name) = ?)";
+                try (PreparedStatement stmt = connection.prepareStatement(checkItemQuery)) {
+                    stmt.setString(1, storeId);
+                    stmt.setString(2, name.toLowerCase());  // On normalise le nom
+                    ResultSet rs = stmt.executeQuery();
+                    if (rs.next()) {
+                        String updateInventoryQuery = "UPDATE inventory SET price = ?, quantity = ? WHERE store_id = ? AND item_id = (SELECT id FROM items WHERE LOWER(name) = ?)";
+                        try (PreparedStatement updateStmt = connection.prepareStatement(updateInventoryQuery)) {
+                            updateStmt.setDouble(1, price);
+                            updateStmt.setInt(2, quantity);
+                            updateStmt.setString(3, storeId);
+                            updateStmt.setString(4, name.toLowerCase());
+                            updateStmt.executeUpdate();
+
+                            JOptionPane.showMessageDialog(frame, "Item mis à jour avec succès.");
+                            frame.dispose();
+                            afficherInventory();  // Rafraîchir l'inventaire
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Item introuvable dans l'inventaire.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(frame, "Quantité et prix doivent être des nombres valides.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(frame, "Erreur lors de la mise à jour de l'item.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
     }
 }
-
-
