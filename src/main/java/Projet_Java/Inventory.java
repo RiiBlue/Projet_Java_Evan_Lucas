@@ -3,8 +3,6 @@ package Projet_Java;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
 
@@ -28,6 +26,15 @@ public class Inventory {
 
         String role = SessionManager.getCurrentUserRole(); // Assurer que tu as une méthode qui récupère le rôle
 
+        JButton choiceAccueil = new JButton("Accueil");
+        choiceAccueil.setBackground(new Color(0, 0, 0));
+        choiceAccueil.setForeground(new Color(0, 0, 0));
+        choiceAccueil.setFont(new Font("Arial", Font.PLAIN, 14));
+        choiceAccueil.addActionListener(e -> {
+            frame.dispose();
+            new Main().createMainFrame((SessionManager.getCurrentUserRole()));
+        });
+        navBar.add(choiceAccueil);
         if ("administrateur".equals(role)) {
             // Si c'est l'admin, on affiche le bouton Choix Magasin
             JButton choiceStoreButton = new JButton("Choix Magasin");
@@ -36,7 +43,7 @@ public class Inventory {
             choiceStoreButton.setFont(new Font("Arial", Font.PLAIN, 14));
             choiceStoreButton.addActionListener(e -> {
                 frame.dispose();
-                new ChoixMagasin().afficherChoixMagasin();
+                new ChoixMagasin().afficherChoixMagasin(SessionManager.getCurrentUserRole());
             });
             navBar.add(choiceStoreButton);
 
@@ -46,7 +53,7 @@ public class Inventory {
             whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
             whiteListButton.addActionListener(e -> {
                 frame.dispose();
-                new WhiteList().afficherWhiteList();
+                new WhiteList().afficherWhiteList(SessionManager.getCurrentUserRole());
             });
             navBar.add(whiteListButton);
 
@@ -56,24 +63,10 @@ public class Inventory {
             manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
             manageEmployeeButton.addActionListener(e -> {
                 frame.dispose();
-                new ManageEmployee().afficherManageEmployee();
+                new ManageEmployee().afficherManageEmployee(SessionManager.getCurrentUserRole());
             });
             navBar.add(manageEmployeeButton);
         } else {
-            JButton inventoryButton = new JButton("Inventaire");
-            inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
-            inventoryButton.setForeground(new Color(220, 53, 69));
-            inventoryButton.setFont(new Font("Arial", Font.PLAIN, 14));
-            inventoryButton.addActionListener(e -> {
-                if (SessionManager.isLoggedIn()) {
-                    frame.dispose();
-                    new Inventory().afficherInventory();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
-                    new Connexion().afficherConnexion();
-                }
-            });
-            navBar.add(inventoryButton);
         }
 
         JButton logoutButton = new JButton("Déconnexion");
@@ -92,7 +85,7 @@ public class Inventory {
         return navBar;
     }
 
-    public void afficherInventory() {
+    public void afficherInventory(String email) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -211,16 +204,12 @@ public class Inventory {
         JTextField quantityField = new JTextField(20);
         JTextField priceField = new JTextField(20);
 
-        JPanel panel = new JPanel();
-        panel.add(new JLabel("Nom de l'item :"));
-        panel.add(nameField);
-        panel.add(new JLabel("Quantité :"));
-        panel.add(quantityField);
-        panel.add(new JLabel("Prix :"));
-        panel.add(priceField);
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+        panel.add(new JLabel("Nom de l'item :")); panel.add(nameField);
+        panel.add(new JLabel("Quantité :")); panel.add(quantityField);
+        panel.add(new JLabel("Prix :")); panel.add(priceField);
 
-        int option = JOptionPane.showConfirmDialog(frame, panel, "Ajouter un Item", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (option == JOptionPane.OK_OPTION) {
+        if (JOptionPane.showConfirmDialog(frame, panel, "Ajouter un Item", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
             String name = nameField.getText().trim();
             String quantityStr = quantityField.getText();
             String priceStr = priceField.getText();
@@ -230,25 +219,28 @@ public class Inventory {
                 return;
             }
 
-            // Normalisation du nom (ignorer les différences de casse)
-            name = name.trim().toLowerCase();
-
             try {
                 int quantity = Integer.parseInt(quantityStr);
                 double price = Double.parseDouble(priceStr);
 
-                String query = "INSERT INTO inventory (store_id, item_id, price, quantity) VALUES (?, ?, ?, ?)";
-                try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                    stmt.setString(1, storeId);
-                    stmt.setString(2, name); // Ajout du nom de l'item
-                    stmt.setDouble(3, price);
-                    stmt.setInt(4, quantity);
-                    stmt.executeUpdate();
+                String itemQuery = "INSERT INTO items (name) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)";
+                String inventoryQuery = "INSERT INTO inventory (store_id, item_id, price, quantity) VALUES (?, LAST_INSERT_ID(), ?, ?)";
+
+                try (PreparedStatement stmt1 = connection.prepareStatement(itemQuery);
+                     PreparedStatement stmt2 = connection.prepareStatement(inventoryQuery)) {
+
+                    stmt1.setString(1, name);
+                    stmt1.executeUpdate();
+
+                    stmt2.setString(1, storeId);
+                    stmt2.setDouble(2, price);
+                    stmt2.setInt(3, quantity);
+                    stmt2.executeUpdate();
+
                     JOptionPane.showMessageDialog(frame, "Item ajouté avec succès.");
                     frame.dispose();
-                    afficherInventory();
+                    afficherInventory(SessionManager.getCurrentUserRole());
                 }
-
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(frame, "Quantité et prix doivent être des nombres valides.", "Erreur", JOptionPane.ERROR_MESSAGE);
             } catch (SQLException e) {
@@ -257,6 +249,7 @@ public class Inventory {
             }
         }
     }
+
     private void showDeleteItemDialog(JFrame frame, Connection connection, String storeId) {
         JTextField nameField = new JTextField(20);
         JPanel panel = new JPanel();
@@ -290,7 +283,7 @@ public class Inventory {
                             if (rowsAffectedItem > 0) {
                                 JOptionPane.showMessageDialog(frame, "Item supprimé avec succès.");
                                 frame.dispose();
-                                afficherInventory();
+                                afficherInventory(SessionManager.getCurrentUserRole());
                             } else {
                                 JOptionPane.showMessageDialog(frame, "Item introuvable dans la table items.", "Erreur", JOptionPane.ERROR_MESSAGE);
                             }
@@ -349,7 +342,7 @@ public class Inventory {
 
                             JOptionPane.showMessageDialog(frame, "Item mis à jour avec succès.");
                             frame.dispose();
-                            afficherInventory();  // Rafraîchir l'inventaire
+                            afficherInventory(SessionManager.getCurrentUserRole());  // Rafraîchir l'inventaire
                         }
                     } else {
                         JOptionPane.showMessageDialog(frame, "Item introuvable dans l'inventaire.", "Erreur", JOptionPane.ERROR_MESSAGE);

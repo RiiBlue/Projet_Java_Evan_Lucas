@@ -20,7 +20,7 @@ public class ChoixMagasin {
         }
     }
 
-    public void afficherChoixMagasin() {
+    public void afficherChoixMagasin(String email) {
         if (!SessionManager.isLoggedIn() || !"administrateur".equals(SessionManager.getCurrentUserRole())) {
             JOptionPane.showMessageDialog(null, "Accès non autorisé.", "Erreur", JOptionPane.ERROR_MESSAGE);
             new Connexion().afficherConnexion();
@@ -29,23 +29,25 @@ public class ChoixMagasin {
 
         JFrame frame = new JFrame("Choix Magasin");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 300);
+        frame.setSize(350, 250);
         frame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         JLabel titleLabel = new JLabel("Sélectionner un magasin");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         mainPanel.add(titleLabel);
-        mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(Box.createVerticalStrut(15));
 
         JComboBox<String> storeComboBox = new JComboBox<>();
+        storeComboBox.setMaximumSize(new Dimension(250, 30));
         loadStores(storeComboBox);
         mainPanel.add(storeComboBox);
 
-        mainPanel.add(Box.createVerticalStrut(20));
+        mainPanel.add(Box.createVerticalStrut(15));
 
         JButton updateButton = new JButton("Mettre à jour");
         updateButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -61,13 +63,14 @@ public class ChoixMagasin {
                         updateAdminStore(storeId);
                         JOptionPane.showMessageDialog(null, "Magasin sélectionné avec succès!", "Succès", JOptionPane.INFORMATION_MESSAGE);
                         frame.dispose();
-                        new Inventory().afficherInventory();  // Rediriger vers la page inventaire
+                        new Inventory().afficherInventory(SessionManager.getCurrentUserRole());
                     } else {
                         JOptionPane.showMessageDialog(null, "Erreur: impossible de trouver le magasin.", "Erreur", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         });
+
         frame.add(mainPanel);
         frame.setVisible(true);
     }

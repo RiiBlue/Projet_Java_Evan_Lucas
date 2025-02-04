@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Projet_Java_Evan_Lucas:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Projet_Java_Evan_Lucas_jar</output-path>
+    <root id="archive" name="Projet_Java_Evan_Lucas.jar">
+      <element id="module-output" name="Projet_Java_Evan_Lucas" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java/4.26.1/protobuf-java-4.26.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

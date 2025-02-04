@@ -6,8 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 public class ManageEmployee {
 
@@ -28,7 +26,17 @@ public class ManageEmployee {
 
         String role = SessionManager.getCurrentUserRole(); // Assurer que tu as une méthode qui récupère le rôle
 
+        JButton choiceAccueil = new JButton("Accueil");
+        choiceAccueil.setBackground(new Color(0, 0, 0));
+        choiceAccueil.setForeground(new Color(0, 0, 0));
+        choiceAccueil.setFont(new Font("Arial", Font.PLAIN, 14));
+        choiceAccueil.addActionListener(e -> {
+            frame.dispose();
+            new Main().createMainFrame((SessionManager.getCurrentUserRole()));
+        });
+        navBar.add(choiceAccueil);
         if ("administrateur".equals(role)) {
+
             // Si c'est l'admin, on affiche le bouton Choix Magasin
             JButton choiceStoreButton = new JButton("Choix Magasin");
             choiceStoreButton.setBackground(new Color(0, 123, 255));
@@ -36,7 +44,7 @@ public class ManageEmployee {
             choiceStoreButton.setFont(new Font("Arial", Font.PLAIN, 14));
             choiceStoreButton.addActionListener(e -> {
                 frame.dispose();
-                new ChoixMagasin().afficherChoixMagasin();
+                new ChoixMagasin().afficherChoixMagasin(SessionManager.getCurrentUserRole());
             });
             navBar.add(choiceStoreButton);
 
@@ -46,19 +54,9 @@ public class ManageEmployee {
             whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
             whiteListButton.addActionListener(e -> {
                 frame.dispose();
-                new WhiteList().afficherWhiteList();
+                new WhiteList().afficherWhiteList(SessionManager.getCurrentUserRole());
             });
             navBar.add(whiteListButton);
-
-            JButton manageEmployeeButton = new JButton("Gérer Employés");
-            manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
-            manageEmployeeButton.setForeground(new Color(40, 167, 69));
-            manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
-            manageEmployeeButton.addActionListener(e -> {
-                frame.dispose();
-                new ManageEmployee().afficherManageEmployee();
-            });
-            navBar.add(manageEmployeeButton);
         } else {
             JButton inventoryButton = new JButton("Inventaire");
             inventoryButton.setBackground(new Color(220, 53, 69)); // Rouge
@@ -67,7 +65,7 @@ public class ManageEmployee {
             inventoryButton.addActionListener(e -> {
                 if (SessionManager.isLoggedIn()) {
                     frame.dispose();
-                    new Inventory().afficherInventory();
+                    new Inventory().afficherInventory(SessionManager.getCurrentUserRole());
                 } else {
                     JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
                     new Connexion().afficherConnexion();
@@ -92,7 +90,7 @@ public class ManageEmployee {
         return navBar;
     }
 
-    public void afficherManageEmployee() {
+    public void afficherManageEmployee(String email) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -105,80 +103,86 @@ public class ManageEmployee {
             return;
         }
 
-        JFrame frame = new JFrame("Manage Employees");
+        JFrame frame = new JFrame("Gérer les employés");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Création du panneau principal
         JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
 
-        // Ajout de la barre de navigation
         JPanel navBar = createNavBar(frame);
         mainPanel.add(navBar, BorderLayout.NORTH);
 
         JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(242, 242, 242));
+        contentPanel.setBackground(new Color(255, 255, 255));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 50, 5, 50);
+        gbc.insets = new Insets(15, 200, 15, 200);
         gbc.weightx = 1;
 
-        JLabel title = new JLabel("Manage Employees", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 24));
+        JLabel title = new JLabel("Gérer les employés", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 30));
+        title.setForeground(new Color(52, 58, 64));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        gbc.insets = new Insets(30, 50, 30, 50);
         contentPanel.add(title, gbc);
 
         JLabel storeLabel = new JLabel("Sélectionner un magasin:");
+        storeLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         gbc.gridy = 1;
         contentPanel.add(storeLabel, gbc);
 
         JComboBox<String> storeComboBox = new JComboBox<>();
+        storeComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
         gbc.gridy = 2;
         contentPanel.add(storeComboBox, gbc);
 
         loadStores(storeComboBox);
 
         JLabel emailLabel = new JLabel("Sélectionner un employé (Email):");
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 18));
         gbc.gridy = 3;
         contentPanel.add(emailLabel, gbc);
 
         JComboBox<String> emailComboBox = new JComboBox<>();
+        emailComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
         gbc.gridy = 4;
         contentPanel.add(emailComboBox, gbc);
 
         loadEmployeeEmails(emailComboBox);
 
+        storeComboBox.setPreferredSize(new Dimension(200, 40));
+        emailComboBox.setPreferredSize(new Dimension(200, 40));
+
+
         JButton updateButton = new JButton("Mettre à jour");
+        updateButton.setFont(new Font("Arial", Font.BOLD, 18));
+        updateButton.setBackground(new Color(40, 167, 69));
+        updateButton.setForeground(Color.WHITE);
+        updateButton.setBorderPainted(false);
+        updateButton.setFocusPainted(false);
         gbc.gridy = 5;
-        gbc.insets = new Insets(20, 150, 20, 150);
+        gbc.insets = new Insets(30, 200, 30, 200);
         contentPanel.add(updateButton, gbc);
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
         frame.add(mainPanel);
         frame.setVisible(true);
 
-        updateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selectedEmail = (String) emailComboBox.getSelectedItem();
-                String selectedStore = (String) storeComboBox.getSelectedItem();
-
-                if (selectedStore != null && selectedEmail != null) {
-                    int storeId = getStoreIdByName(selectedStore);
-                    int employeeId = getEmployeeIdByEmail(selectedEmail);
-
-                    if (storeId != -1 && employeeId != -1) {
-                        updateEmployeeStore(employeeId, storeId);
-
-                        JOptionPane.showMessageDialog(null, "Employé ajouté au magasin avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
-                        frame.dispose();
-                        new ManageEmployee().afficherManageEmployee();
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Erreur : impossible de lier l'employé au magasin.", "Erreur", JOptionPane.ERROR_MESSAGE);
-                    }
+        updateButton.addActionListener(e -> {
+            String selectedEmail = (String) emailComboBox.getSelectedItem();
+            String selectedStore = (String) storeComboBox.getSelectedItem();
+            if (selectedStore != null && selectedEmail != null) {
+                int storeId = getStoreIdByName(selectedStore);
+                int employeeId = getEmployeeIdByEmail(selectedEmail);
+                if (storeId != -1 && employeeId != -1) {
+                    updateEmployeeStore(employeeId, storeId);
+                    JOptionPane.showMessageDialog(null, "Employé ajouté au magasin avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+                    frame.dispose();
+                    new ManageEmployee().afficherManageEmployee(SessionManager.getCurrentUserRole());
+                } else {
+                    JOptionPane.showMessageDialog(null, "Erreur : impossible de lier l'employé au magasin.", "Erreur", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

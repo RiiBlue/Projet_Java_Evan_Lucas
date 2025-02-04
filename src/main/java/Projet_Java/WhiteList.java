@@ -2,12 +2,9 @@ package Projet_Java;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import org.mindrot.jbcrypt.BCrypt;
 
 public class WhiteList {
 
@@ -29,27 +26,26 @@ public class WhiteList {
 
         String role = SessionManager.getCurrentUserRole(); // Assurer que tu as une méthode qui récupère le rôle
 
+        JButton choiceAccueil = new JButton("Accueil");
+        choiceAccueil.setBackground(new Color(0, 0, 0));
+        choiceAccueil.setForeground(new Color(0, 0, 0));
+        choiceAccueil.setFont(new Font("Arial", Font.PLAIN, 14));
+        choiceAccueil.addActionListener(e -> {
+            frame.dispose();
+            new Main().createMainFrame(SessionManager.getCurrentUserRole());
+        });
+        navBar.add(choiceAccueil);
         if ("administrateur".equals(role)) {
-            // Si c'est l'admin, on affiche le bouton Choix Magasin
+
             JButton choiceStoreButton = new JButton("Choix Magasin");
             choiceStoreButton.setBackground(new Color(0, 123, 255));
             choiceStoreButton.setForeground(new Color(0, 123, 255));
             choiceStoreButton.setFont(new Font("Arial", Font.PLAIN, 14));
             choiceStoreButton.addActionListener(e -> {
                 frame.dispose();
-                new ChoixMagasin().afficherChoixMagasin();
+                new ChoixMagasin().afficherChoixMagasin(SessionManager.getCurrentUserRole());
             });
             navBar.add(choiceStoreButton);
-
-            JButton whiteListButton = new JButton("Liste blanche");
-            whiteListButton.setBackground(new Color(0, 123, 255));
-            whiteListButton.setForeground(new Color(0, 123, 255));
-            whiteListButton.setFont(new Font("Arial", Font.PLAIN, 14));
-            whiteListButton.addActionListener(e -> {
-                frame.dispose();
-                new WhiteList().afficherWhiteList();
-            });
-            navBar.add(whiteListButton);
 
             JButton manageEmployeeButton = new JButton("Gérer Employés");
             manageEmployeeButton.setBackground(new Color(40, 167, 69)); // Couleur verte
@@ -57,7 +53,7 @@ public class WhiteList {
             manageEmployeeButton.setFont(new Font("Arial", Font.PLAIN, 14));
             manageEmployeeButton.addActionListener(e -> {
                 frame.dispose();
-                new ManageEmployee().afficherManageEmployee();
+                new ManageEmployee().afficherManageEmployee(SessionManager.getCurrentUserRole());
             });
             navBar.add(manageEmployeeButton);
         } else {
@@ -68,7 +64,7 @@ public class WhiteList {
             inventoryButton.addActionListener(e -> {
                 if (SessionManager.isLoggedIn()) {
                     frame.dispose();
-                    new Inventory().afficherInventory();
+                    new Inventory().afficherInventory(SessionManager.getCurrentUserRole());
                 } else {
                     JOptionPane.showMessageDialog(null, "Vous devez être connecté pour accéder à l'inventaire.");
                     new Connexion().afficherConnexion();
@@ -93,7 +89,7 @@ public class WhiteList {
         return navBar;
     }
 
-    public void afficherWhiteList() {
+    public void afficherWhiteList(String email) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -137,18 +133,18 @@ public class WhiteList {
         // Label et champ pour l'email
         JLabel emailLabel = new JLabel("Email :", SwingConstants.LEFT);
         emailLabel.setFont(new Font("Arial", Font.PLAIN, 25));
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.insets = new Insets(10, 150, 5, 150);
         contentPanel.add(emailLabel, gbc);
 
         JTextField emailField = new JTextField(20);
         emailField.setPreferredSize(new Dimension(emailField.getPreferredSize().width, 100));
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         contentPanel.add(emailField, gbc);
 
         // Bouton d'ajout
         JButton submitButton = new JButton("Ajouter");
-        gbc.gridy = 7;
+        gbc.gridy = 6;
         gbc.insets = new Insets(30, 750, 30, 750);
         contentPanel.add(submitButton, gbc);
 
@@ -159,12 +155,13 @@ public class WhiteList {
 
         // Liste déroulante des employés
         JComboBox<String> employeeComboBox = new JComboBox<>();
-        gbc.gridy = 2;
+        gbc.gridy = 2
+        ;
         contentPanel.add(employeeComboBox, gbc);
 
         // Bouton de suppression
         JButton deleteButton = new JButton("Retirer");
-        gbc.gridy = 7;
+        gbc.gridy = 3;
         gbc.insets = new Insets(-30, 750, 30, 750);
         contentPanel.add(deleteButton, gbc);
 
@@ -223,7 +220,7 @@ public class WhiteList {
             insertUser(connection, email);
             JOptionPane.showMessageDialog(null, "Email ajouté avec succès à la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
             frame.dispose();
-            new WhiteList().afficherWhiteList();
+            new WhiteList().afficherWhiteList(SessionManager.getCurrentUserRole());
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -240,7 +237,7 @@ public class WhiteList {
             deleteUser(connection, email);
             JOptionPane.showMessageDialog(null, "Email supprimé avec succès de la liste blanche !", "Succès", JOptionPane.INFORMATION_MESSAGE);
             frame.dispose();
-            new WhiteList().afficherWhiteList();
+            new WhiteList().afficherWhiteList(SessionManager.getCurrentUserRole());
 
         } catch (SQLException ex) {
             ex.printStackTrace();

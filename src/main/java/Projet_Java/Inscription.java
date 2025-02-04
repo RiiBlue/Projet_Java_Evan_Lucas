@@ -2,13 +2,9 @@ package Projet_Java;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import java.io.FileInputStream;
-import java.io.IOException;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class Inscription {
@@ -35,83 +31,94 @@ public class Inscription {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        JPanel mainPanel = new JPanel(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(0, 0, new Color(44, 62, 80), getWidth(), getHeight(), new Color(52, 152, 219));
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
 
         JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(242, 242, 242));
+        contentPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 50, 5, 50);
-        gbc.weightx = 1;
+        gbc.insets = new Insets(10, 50, 10, 50);
 
         JLabel title = new JLabel("Inscription", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setFont(new Font("Arial", Font.BOLD, 28));
+        title.setForeground(Color.WHITE);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        gbc.insets = new Insets(30, 50, 30, 50);
         contentPanel.add(title, gbc);
 
-        JLabel nameLabel = new JLabel("Pseudo :", SwingConstants.LEFT);
-        nameLabel.setFont(new Font("Arial", Font.PLAIN, 25));
+        JLabel namelabel = new JLabel("Pseudo :");
+        namelabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        namelabel.setForeground(Color.WHITE);
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        gbc.insets = new Insets(10, 150, 5, 150);
-        contentPanel.add(nameLabel, gbc);
+        gbc.gridwidth = 2;
+        contentPanel.add(namelabel, gbc);
 
         JTextField nameField = new JTextField(20);
-        nameField.setPreferredSize(new Dimension(nameField.getPreferredSize().width, 100));
         gbc.gridy = 2;
         contentPanel.add(nameField, gbc);
 
-        JLabel emailLabel = new JLabel("Email :", SwingConstants.LEFT);
-        emailLabel.setFont(new Font("Arial", Font.PLAIN, 25));
+        JLabel emailLabel = new JLabel("Email :");
+        emailLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        emailLabel.setForeground(Color.WHITE);
         gbc.gridy = 3;
-        gbc.insets = new Insets(10, 150, 5, 150);
+        gbc.gridwidth = 2;
         contentPanel.add(emailLabel, gbc);
 
         JTextField emailField = new JTextField(20);
-        emailField.setPreferredSize(new Dimension(emailField.getPreferredSize().width, 100));
         gbc.gridy = 4;
         contentPanel.add(emailField, gbc);
 
-        JLabel passwordLabel = new JLabel("Mot de passe :", SwingConstants.LEFT);
-        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 25));
+        JLabel passwordLabel = new JLabel("Mot de passe :");
+        passwordLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        passwordLabel.setForeground(Color.WHITE);
         gbc.gridy = 5;
-        gbc.insets = new Insets(10, 150, 5, 150);
         contentPanel.add(passwordLabel, gbc);
 
         JPasswordField passwordField = new JPasswordField(20);
-        passwordField.setPreferredSize(new Dimension(passwordField.getPreferredSize().width, 100));
         gbc.gridy = 6;
         contentPanel.add(passwordField, gbc);
 
         JButton submitButton = new JButton("S'inscrire");
+        submitButton.setBackground(new Color(41, 128, 185));
+        submitButton.setForeground(Color.WHITE);
+        submitButton.setFont(new Font("Arial", Font.BOLD, 16));
+        submitButton.setBorderPainted(false);
         gbc.gridy = 7;
-        gbc.insets = new Insets(30, 750, 30, 750);
+        gbc.insets = new Insets(20, 50, 10, 50);
         contentPanel.add(submitButton, gbc);
 
-        JLabel loginRedirect = new JLabel("Déjà inscrit ? ");
-        loginRedirect.setFont(new Font("Arial", Font.PLAIN, 12));
-        loginRedirect.setForeground(Color.BLACK);
-
-        JButton loginButton = new JButton("Connexion");
-        loginButton.addActionListener(e -> {
-            frame.dispose();
-            new Connexion().afficherConnexion();
-        });
-
         JPanel loginPanel = new JPanel();
-        loginPanel.setBackground(new Color(242, 242, 242));
+        loginPanel.setOpaque(false);
+        JLabel loginRedirect = new JLabel("Déjà Inscrit ? ");
+        loginRedirect.setFont(new Font("Arial", Font.PLAIN, 14));
+        loginRedirect.setForeground(Color.WHITE);
+        JButton loginButton = new JButton("Se connecter");
+        loginButton.setBackground(new Color(231, 76, 60));
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFont(new Font("Arial", Font.BOLD, 14));
+        loginButton.setBorderPainted(false);
         loginPanel.add(loginRedirect);
         loginPanel.add(loginButton);
-        gbc.gridy = 8;
+        gbc.gridy = 9;
         contentPanel.add(loginPanel, gbc);
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
-
         frame.add(mainPanel);
         frame.setVisible(true);
+
+        submitButton.addActionListener(e -> handleInscription(nameField.getText(), emailField.getText(), new String(passwordField.getPassword()), frame));
+        loginButton.addActionListener(e -> new Connexion().afficherConnexion());
+        loginButton.addActionListener(e -> frame.dispose());
 
         submitButton.addActionListener(e -> {
             handleInscription(nameField.getText(), emailField.getText(), new String(passwordField.getPassword()), frame);
@@ -120,7 +127,7 @@ public class Inscription {
 
     private void handleInscription(String name, String email, String password, JFrame frame) {
         if (name.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Nom de l'entreprise manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Pseudo manquant.", "Erreur", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
