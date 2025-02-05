@@ -103,6 +103,17 @@ public class Main {
                 }
             });
             navBar.add(inventoryButton);
+
+            JButton ManageStore = new JButton("Gestion Store");
+            ManageStore.setBackground(new Color(220, 53, 69)); // Rouge
+            ManageStore.setForeground(new Color(220, 53, 69));
+            ManageStore.setFont(new Font("Arial", Font.PLAIN, 14));
+            ManageStore.addActionListener(e -> {
+                SessionManager.endSession();
+                frame.dispose();
+                new StoreManager().afficherGestionStore();
+            });
+            navBar.add(ManageStore);
         }
 
         JButton logoutButton = new JButton("Déconnexion");
@@ -119,16 +130,6 @@ public class Main {
             navBar.add(logoutButton);
         }
 
-        JButton ManageStore = new JButton("Gestion Store");
-        ManageStore.setBackground(new Color(220, 53, 69)); // Rouge
-        ManageStore.setForeground(new Color(220, 53, 69));
-        ManageStore.setFont(new Font("Arial", Font.PLAIN, 14));
-        ManageStore.addActionListener(e -> {
-            SessionManager.endSession();
-            frame.dispose();
-            new StoreManager().afficherGestionStore();
-        });
-        navBar.add(ManageStore);
         return navBar;
     }
 
